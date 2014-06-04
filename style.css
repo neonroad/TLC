@@ -1,0 +1,88 @@
+body{
+  background-color:gray;
+  
+}
+#canvas{
+  border:5px solid black;
+  display:block;
+  margin:auto;
+  height:300px;
+  width:400px;
+}
+#text{
+  overflow: auto;
+  background-color:#132231;
+  border:5px solid black;
+  display:block;
+  margin:auto;
+  height:100px;
+  width:400px;
+  font-family:Verdana;
+  color:white;
+  text-align:center;
+}
+#status{
+  overflow: auto;
+  position:relative;
+  background-color:#00FF00;
+  border:5px solid black;
+  height:130px;
+  width:400px;
+  font-size:20px;
+  font-family:Impact;
+  color:black;
+  text-align:center;
+  display:block;
+  margin:auto;
+}
+
+#response{
+  overflow: auto;
+  position:relative;
+  background-color:#333333;
+  border:5px solid black;
+  display:block;
+  margin:auto;
+  height:100px;
+  width:400px;
+  font-family:Arial;
+  color:white;
+  text-align:center;
+}
+#actionBox{
+  position:relative;
+  display:block;
+  margin:auto;
+  width:400px;
+}
+
+#submit{
+  margin:auto;
+  display:block;
+  width:300px;
+}
+
+#inv{
+  z-index:-1;
+  position:absolute;
+  top:10px;
+  border: 5px solid black;
+  background-color: yellow;
+  height:600px;
+  width:300px;
+  text-align: center;
+  font-family: arial;
+  padding:20px
+}
+#space{
+  background-color: orange;
+  height:550px;
+  width:300px;
+}
+#invlist{
+  text-align:left;
+}
+#arrow{
+  display:block;
+  margin:auto;
+}

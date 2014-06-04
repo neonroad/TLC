@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>TLC RL</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+  <div id="test">
+    <div id= "game">
+      <img id="canvas">
+      <div id="text"></div>
+      <div id="status"></div>
+      <div id="response"></div>
+      <input type="text" id="actionBox" onkeydown="if (event.keyCode == 13) document.getElementById('submit').click()" autofocus/>
+      <input type="button" id="submit" value="Perform!" onclick="update();" />
+      <img id="arrow">
+    </div>
+  </div>
+
+  <div id="outsideInv">
+    <div id="inv"><strong>INVENTORY</strong> <!-- INVENTORY DIV-->
+      <div id="space">
+        <ul id="invlist">
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div ="helpPanel">
+    <div id="controls">
+      <strong>CONTROLS</strong>
+      <ul id="controlList">
+      <li>walk - w</li>
+      <li>wait - wa</li>
+      <li>jump - j</li>
+      <li>search - s</li>
+      <li>spit - sp</li>
+      <li>use - u</li>
+      <li>help - h</li>
+      </ul>
+    </div>
+  </div>
+  <script type="text/javascript" src="original.js"></script>
+</body>
+</html>
