@@ -2,7 +2,7 @@
 
 //Gameplay Elements
 var hp = 15;
-var maxhp = 15;
+var maxhp = 1;
 var nrg = 10;
 var maxnrg = 10;
 var dmg = 3;
@@ -267,9 +267,12 @@ var update = function(){
             if(hp <= 0){
               gameOver("You fell to your death!");
             }
-            turn ++;
-            roomie = newroom();
-            updateRoomText();
+            else{
+
+              turn ++;
+              roomie = newroom();
+              updateRoomText();
+            }
           }
           //junk pit
           else if(choice === true && roomie.symbol === "J"){
