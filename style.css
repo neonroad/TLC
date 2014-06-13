@@ -86,3 +86,15 @@ body{
   display:block;
   margin:auto;
 }
+#helpPanel{
+  text-align: center;
+  border: 5px solid black;
+  border-radius:5px;
+  background-color: #BBBBBB;
+  margin:auto;
+  width:200px;
+  height:200px;
+}
+span{
+  font-family: Verdana;
+}
