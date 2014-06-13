@@ -20,6 +20,13 @@ var arrowColor = function(){
   console.log("changed");
 }
 
+//Monsters
+creature = function(name, hp, dmg){
+  this.name = name;
+  this.hp = hp;
+  this.dmg = dmg;
+};
+
 //Regen
 var regen = function(){
   
@@ -87,10 +94,10 @@ actionText.innerHTML = "Type your action below. <br> Press 'h' for help.";
 
 //New Room
 var newroom = function(){
-  var newerroom = new room(null, null, null); // 2 types of rooms: pits & corridors
+  var newerroom = new room(null, null, null); // 3 types of rooms: pits, corridors & monsters
   
   //random room generation
-  var rand = randomNumber(2,1);
+  var rand = randomNumber(3,1);
   //random pit generation
   if(rand === 2){
     rand = randomNumber(4,1);
@@ -116,6 +123,19 @@ var newroom = function(){
     //default image
     image.src="assets/pit.png";
   }
+
+  //monster room
+  else if(rand === 3){
+    rand = randomNumber(1,1);
+    if(rand === 1){
+      newerroom = new room("skeleton room", null, "M");
+      newerroom.desc = "A skeleton blocks the way!";
+      image.src = "assets/monster1.png";
+      monster = new creature('skeleton', 5, 3);
+    }
+
+  }
+
   else{
     //graffiti generation
     rand = randomNumber(10, 1);
@@ -157,31 +177,34 @@ var gameOver = function(cause){
   actionText.innerHTML = "R.I.P <br>" + cause + "<br> Refresh for a new run.";
   gameover = 1;
   hp = 0;
+  updateStats();
   actionBox.disabled = true;
 };
 
-
+var updateStats = function(){
+  if(hp >= maxhp){
+    hp = maxhp;
+  }
+  if(hp <= 0){
+    hp=0;
+  }
+  if(nrg >= maxnrg){
+    nrg = maxnrg;
+  }
+  /*if(hp <= 0){
+    hp = 0;
+    gameOver("You died of mysterious causes!");
+  } */
+  if(nrg <= 0){
+    nrg = 0;
+  }
+  var status = document.getElementById("status");
+  status.innerHTML = "HP: " + hp + "/" + maxhp + "<br> NRG: " + nrg + "/" + maxnrg + "<br> DMG: " + dmg + "<br> TRN: " + turn + "<br> SCORE: " + score;
+};
 //============UPDATE============
 var update = function(){
   
-  //stat update
-  var updateStats = function(){
-    if(hp >= maxhp){
-      hp = maxhp;
-    }
-    if(nrg >= maxnrg){
-      nrg = maxnrg;
-    }
-    /*if(hp <= 0){
-      hp = 0;
-      gameOver("You died of mysterious causes!");
-    } */
-    if(nrg <= 0){
-      nrg = 0;
-    }
-    var status = document.getElementById("status");
-    status.innerHTML = "HP: " + hp + "/" + maxhp + "<br> NRG: " + nrg + "/" + maxnrg + "<br> DMG: " + dmg + "<br> TRN: " + turn + "<br> SCORE: " + score;
-  };
+  
   
   //recieve action
   var updateAction = function(){
@@ -311,6 +334,31 @@ var update = function(){
             console.log("stepped back");
           }
         }
+
+        //walking through monster
+        else if(roomie.symbol === "M"){
+          choice = confirm("Try to avoid the monster?");
+          if(choice === true && roomie.name === "skeleton room"){
+            rand = randomNumber(4,1);
+            if(rand === 2){
+              actionText.innerHTML = "You escaped the skeleton! <br> Guess he didn't have the guts to stop you."
+              console.log("escaped");
+              roomie = newroom();
+              updateRoomText();
+              turn ++;
+            }
+            else{
+              actionText.innerHTML = "The skeleton awkwardly blocks your way, and slashes you away for " + monster.dmg + " damage!";
+              hp -= rand;
+              if(hp <=0){
+                gameOver("A skeleton defeated you while you rudely tried to leave.");
+              }
+            }
+          }
+          else{
+            actionText.innerHTML = "You stay put.";
+          }
+        }
         //walking - no obstacle
         else{
           actionText.innerHTML = "You move onward.";
@@ -335,21 +383,66 @@ var update = function(){
       case "JUMP":
       case "Jump":
         //check for pit if energy available
-        if(nrg >=1){
+        if(nrg >=2){
           if(roomie.symbol === "P" || roomie.symbol === "S" || roomie.symbol === "G" || roomie.symbol === "J"){
             console.log("jumped over pit");
             actionText.innerHTML = "You jump over the pit!";
+            nrg-=2;
+            turn ++;
+            roomie = newroom();
+            updateRoomText();
             
+          }
+
+          //monster jump attack
+          else if(roomie.symbol === "M"){
+            if(roomie.name = "skeleton room"){
+              actionText.innerHTML = "You do an awesome jump kick...";
+              console.log("jump kick");
+              image.src = "assets/jumpkick.png";
+
+              rand = randomNumber(4,1);
+              setTimeout(function(){
+
+              if(rand === 2){
+                actionText.innerHTML = "... and the skeleton shatters as you fly through!";
+                console.log("succes skeleton jump kick");
+                nrg-=4;
+                updateStats();
+                turn ++;
+                roomie = newroom();
+                updateRoomText();
+              }
+              else{
+                actionText.innerHTML = "... but the skeleton slashes you back down, making you take " + (monster.dmg+3) + " damage!";
+                image.src = "assets/monster1.png";
+                hp -= monster.dmg + 3;
+                if(hp<=0){
+                  actionBox.disabled = true;
+                  image.src = "assets/monster1win.png";
+                  setTimeout(function(){
+                    gameOver("You tried to look cool, but a skeleton embarrassed you.");
+                  },2000)
+                }
+                nrg -=4;
+                turn++;
+                updateStats();
+                
+              }
+
+              },2000);
+            }
           }
           //no pit
           else{
             actionText.innerHTML = "You jump!";
             console.log("jumped");
+            nrg-=2;
+            turn ++;
+            roomie = newroom();
+            updateRoomText();
+            updateStats();
           }
-        nrg-=2;
-        turn ++;
-        roomie = newroom();
-        updateRoomText();
         }
         //tried jump, no energy
         else{
@@ -401,6 +494,10 @@ var update = function(){
           else if(roomie.symbol === "J"){
             actionText.innerHTML = "Some words on the wall read 'Garbage dump'.";
           }
+          //monster search
+          else if(roomie.symbol === "M"){
+            actionText.innerHTML = "The " + monster.name + ":<br>" + "HP: " + monster.hp + "<br>" + "DMG: " + monster.dmg;
+          }
           //unknown search
           else{
             actionText.innerHTML = "What... is this?";
@@ -408,8 +505,15 @@ var update = function(){
         }
         //miss search
         else{
-          console.log("miss search");
-          actionText.innerHTML = "You don't notice anything.";
+          //miss search in monster room
+          if(roomie.symbol === "M"){
+            console.log("miss monster search");
+            actionText.innerHTML = "You don't notice anything about the monster.";
+          }
+          else{
+            console.log("miss search");
+            actionText.innerHTML = "You don't notice anything.";
+          }
         }
         turn++;
         break;
@@ -439,6 +543,12 @@ var update = function(){
           else if(roomie.symbol === "J"){
               actionText.innerHTML = "*peck* <br> Sounds like it hit some sort of object.";
               objectSpit = 1;
+          }
+          //monster spit
+          else if(roomie.symbol === "M"){
+            if(roomie.name = "skeleton room"){
+              actionText.innerHTML = "*splat* <br> The skeleton looks sad.";
+            }
           }
           //unknown spit
           else{
@@ -510,8 +620,23 @@ var update = function(){
         }
             
           break;
-        
-        
+        //fight
+        case "fight":
+        case "Fight":
+        case "FIGHT":
+        case "f":
+        case "F":
+          if(roomie.symbol === "M"){
+            if(roomie.name = "skeleton room"){
+              actionText.innerHTML
+              turn++;
+              updateStats();
+            }
+          }
+          else{
+            actionText.innerHTML = "You fight your inner conscious. <br> Just kidding. There's nothing to fight here."
+          }
+          break;
         
         
         //********************** HELP SCREEN **********************
