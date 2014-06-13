@@ -152,14 +152,12 @@ var newroom = function(){
 
 //GAME OVER
 var gameOver = function(cause){
-  alert("Game over!");
-  alert(cause);
-  
   image.src = "assets/gameOver.png";
   roomText.innerHTML = "Your final score: " + score;
   actionText.innerHTML = "R.I.P <br>" + cause + "<br> Refresh for a new run.";
   gameover = 1;
   hp = 0;
+  actionBox.disabled = true;
 };
 
 
@@ -187,9 +185,10 @@ var update = function(){
   
   //recieve action
   var updateAction = function(){
+    var actionBox = document.getElementById("actionBox");
     action = document.getElementById("actionBox").value;
-  document.getElementById("actionBox").value = null;
-  return action;
+    document.getElementById("actionBox").value = null;
+    return action;
   };
   
   //update room text
@@ -238,24 +237,30 @@ var update = function(){
           var choice = confirm("Are you sure you want to walk into the pit?");
           //spike pit
           if(choice === true && roomie.symbol === "S"){
+            actionBox.disabled = true;
             image.src="assets/spike.png";
             console.log("died");
             actionText.innerHTML = "You fell in the pit, only to be met with a spiky doom!";
-            gameOver("You died from falling in a spike pit.");
-            console.log(gameover);
+            setTimeout(function(){
+              gameOver("You died from falling in a spike pit.");
+              console.log(gameover);
+            },5000);
           }
           //gold pit
           else if(choice === true && roomie.symbol === "G"){
+            actionBox.disabled = true;
             image.src="assets/gold.png";
             console.log("collected gold");
             rand = randomNumber(11,10);
             score+=rand;
             actionText.innerHTML = "You fell in the pit...<br> But some gold broke your fall! <br> Obtained $" + rand + "!";
-            alert("You fell in the pit...\n But some gold broke your fall! \n Obtained $" + rand + "!");
-            roomie = newroom();
-            updateRoomText();
-            actionText.innerHTML = "You crawl out of the pit.";
-            turn ++;
+            setTimeout(function(){
+              roomie = newroom();
+              updateRoomText();
+              actionText.innerHTML = "You crawl out of the pit.";
+              turn ++;
+              actionBox.disabled = false;
+            }, 3000);
             
           }
           //regular pit
@@ -276,22 +281,29 @@ var update = function(){
           }
           //junk pit
           else if(choice === true && roomie.symbol === "J"){
+            actionBox.disabled = true;
+            image.src="assets/item.png";
             console.log("junk pile fall");
             var junkItem = randItem();
-            alert("Oof! You fell on something.");
-            actionText.innerHTML = "You got " + junkItem.name + "!";
-            if(objectSpit === 1){
-              actionText.innerHTML = "You got " + junkItem.name + "! <br><br> You wiped the spit off.";
-              objectSpit = 0;
-            }
-            items.push(junkItem);
-            li = document.createElement("li");
-            var node = document.createTextNode(junkItem.name);
-            li.appendChild(node);
-            invList.appendChild(li);
-            turn ++;
-            roomie = newroom();
-            updateRoomText();
+            actionText.innerHTML = "Oof! You fell on something.";
+            setTimeout(function(){
+              actionText.innerHTML = "You got " + junkItem.name + "! <br> <br> You crawled out the pit.";
+              if(objectSpit === 1){
+                actionText.innerHTML = "You got " + junkItem.name + "! <br><br> You wiped the spit off. <br> You crawled out the pit.";
+                objectSpit = 0;
+              }
+              items.push(junkItem);
+              li = document.createElement("li");
+              var node = document.createTextNode(junkItem.name);
+              li.appendChild(node);
+              invList.appendChild(li);
+              turn ++;
+              roomie = newroom();
+              updateRoomText();
+              actionBox.disabled = false;
+            },3000);
+            
+            
           }
           //refuse walking into pit
           else{
