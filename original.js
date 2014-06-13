@@ -2,7 +2,7 @@
 
 //Gameplay Elements
 var hp = 15;
-var maxhp = 1;
+var maxhp = 15;
 var nrg = 10;
 var maxnrg = 10;
 var dmg = 3;
