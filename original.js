@@ -355,13 +355,14 @@ var update = function(){
             else{
               actionText.innerHTML = "The skeleton awkwardly blocks your way, and slashes you away for " + monster.dmg + " damage!";
               hp -= rand;
-              actionBox.disabled = true;
               if(hp <=0){
                 image.src = "assets/monster1win.png";
+                actionBox.disabled = true;
                 setTimeout(function(){
                   gameOver("A skeleton defeated you while you tried to leave. <br> How rude of you!");
                 },2000);
               }
+              actionBox.disabled = false;
             }
           }
           else{
@@ -409,11 +410,13 @@ var update = function(){
               actionText.innerHTML = "You do an awesome jump kick...";
               console.log("jump kick");
               image.src = "assets/jumpkick.png";
+              actionBox.disabled = true;
 
               rand = randomNumber(4,1);
               setTimeout(function(){
 
               if(rand === 2){
+                actionBox.disabled = false;
                 actionText.innerHTML = "... and the skeleton shatters as you fly through!";
                 console.log("succes skeleton jump kick");
                 nrg-=4;
@@ -423,6 +426,7 @@ var update = function(){
                 updateRoomText();
               }
               else{
+                actionBox.disabled = false;
                 actionText.innerHTML = "... but the skeleton slashes you back down, making you take " + (monster.dmg+3) + " damage!";
                 image.src = "assets/monster1.png";
                 hp -= monster.dmg + 3;
@@ -629,7 +633,7 @@ var update = function(){
         }
             
           break;
-        //fight
+        //fight action
         case "fight":
         case "Fight":
         case "FIGHT":
@@ -662,7 +666,8 @@ var update = function(){
                   rand = randomNumber(10, 1);
                   var lootItem = randItem();
                   image.src = "assets/monster1lose.png";
-                  actionText.innerHTML = "You won the fight! <br> +"+rand ;
+                  actionText.innerHTML = "You won the fight! <br> +"+ rand +" gold!";
+                  score += rand;
                   actionBox.disabled = true;
                   setTimeout(function(){
                     rand = randomNumber(5,1);
