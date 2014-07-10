@@ -18,7 +18,7 @@ var arrow = document.getElementById("arrow");
 var arrowColor = function(){
   arrow.src="assets/arrowYellow.png";
   console.log("changed");
-}
+};
 
 //Monsters
 creature = function(name, hp, dmg){
@@ -225,7 +225,7 @@ var update = function(){
   var decide = function(){
     switch(updateAction()){
       
-      //wait
+      //wait action
       case "wait":
       case "rest":
       case "wa":
@@ -235,17 +235,22 @@ var update = function(){
       case "WAIT":
       case "Wait":
         console.log("waited");
-        if(hp === maxhp && nrg === maxnrg){
+        if(hp === maxhp && nrg === maxnrg && roomie.symbol !== "M"){
           actionText.innerHTML= "You wait for no apparent reason.";
+          regen();
+          turn++;
+        }
+        else if(roomie.symbol === 'M'){
+          actionText.innerHTML = "You can't wait while theres a monster in front of you!";
         }
         else{
           actionText.innerHTML= "You wait, restoring your stats.";
+          regen();
+          turn++;
         }
-        regen();
-        turn++;
         break;
         
-      //walk  
+      //walk action
       case "walk":
       case "run":
       case "w":
@@ -341,7 +346,7 @@ var update = function(){
           if(choice === true && roomie.name === "skeleton room"){
             rand = randomNumber(4,1);
             if(rand === 2){
-              actionText.innerHTML = "You escaped the skeleton! <br> Guess he didn't have the guts to stop you."
+              actionText.innerHTML = "You escaped the skeleton! <br> Guess he didn't have the guts to stop you.";
               console.log("escaped");
               roomie = newroom();
               updateRoomText();
@@ -350,8 +355,12 @@ var update = function(){
             else{
               actionText.innerHTML = "The skeleton awkwardly blocks your way, and slashes you away for " + monster.dmg + " damage!";
               hp -= rand;
+              actionBox.disabled = true;
               if(hp <=0){
-                gameOver("A skeleton defeated you while you rudely tried to leave.");
+                image.src = "assets/monster1win.png";
+                setTimeout(function(){
+                  gameOver("A skeleton defeated you while you tried to leave. <br> How rude of you!");
+                },2000);
               }
             }
           }
@@ -396,7 +405,7 @@ var update = function(){
 
           //monster jump attack
           else if(roomie.symbol === "M"){
-            if(roomie.name = "skeleton room"){
+            if(roomie.name === "skeleton room"){
               actionText.innerHTML = "You do an awesome jump kick...";
               console.log("jump kick");
               image.src = "assets/jumpkick.png";
@@ -422,7 +431,7 @@ var update = function(){
                   image.src = "assets/monster1win.png";
                   setTimeout(function(){
                     gameOver("You tried to look cool, but a skeleton embarrassed you.");
-                  },2000)
+                  },2000);
                 }
                 nrg -=4;
                 turn++;
@@ -546,7 +555,7 @@ var update = function(){
           }
           //monster spit
           else if(roomie.symbol === "M"){
-            if(roomie.name = "skeleton room"){
+            if(roomie.name === "skeleton room"){
               actionText.innerHTML = "*splat* <br> The skeleton looks sad.";
             }
           }
@@ -565,7 +574,7 @@ var update = function(){
         
         break;
         
-      //use
+      //use action
       case "use":
       case "Use":
       case "u":
@@ -627,14 +636,63 @@ var update = function(){
         case "f":
         case "F":
           if(roomie.symbol === "M"){
-            if(roomie.name = "skeleton room"){
-              actionText.innerHTML
-              turn++;
-              updateStats();
+            if(roomie.name === "skeleton room"){
+              actionBox.disabled = true;
+              image.src = "assets/pow.png";
+              
+              setTimeout(function(){
+                image.src = "assets/monster1.png";  
+                actionBox.disabled = false;
+                actionText.innerHTML = "You deal " + dmg + " damage to the skeleton!" + "<br>------<br> The skeleton does " + monster.dmg + " damage to you in return!";
+                monster.hp -= dmg;
+                hp -= monster.dmg;
+                turn++;
+                updateStats();
+                
+                if(hp <=0){
+                  actionBox.disabled = true;
+                  image.src = "assets/monster1win.png";
+                  actionText.innerHTML = "Fatal damage! <br>You die...";
+                  setTimeout(function(){
+                    gameOver("A skeleton has slain you."); 
+
+                  }, 3000);
+                }
+                else if(monster.hp <= 0){
+                  rand = randomNumber(10, 1);
+                  var lootItem = randItem();
+                  image.src = "assets/monster1lose.png";
+                  actionText.innerHTML = "You won the fight! <br> +"+rand ;
+                  actionBox.disabled = true;
+                  setTimeout(function(){
+                    rand = randomNumber(5,1);
+                    if(rand === 1){
+                      actionText.innerHTML = "You found a " + lootItem.name + " in the pile of bones! <br> You continue.";
+                      items.push(lootItem);
+                      li = document.createElement("li");
+                      var node = document.createTextNode(lootItem.name);
+                      li.appendChild(node);
+                      invList.appendChild(li);
+
+                    }
+                    else{
+                      actionText.innerHTML = "You found nothing in the bone pile. <br> You continue.";
+                    }
+                    actionBox.disabled = false;
+                    roomie = newroom();
+                    updateRoomText();
+                    updateStats();
+                    turn++;
+                    updateStats();
+
+                  }, 1000);
+                }
+              }, 1000);
+              
             }
           }
           else{
-            actionText.innerHTML = "You fight your inner conscious. <br> Just kidding. There's nothing to fight here."
+            actionText.innerHTML = "You fight your inner conscious. <br> Just kidding. There's nothing to fight here.";
           }
           break;
         
@@ -747,7 +805,7 @@ var update = function(){
         console.log("misunderstood");
         actionText.innerHTML = "Sorry, didn't quite get that. <br> Press 'h' for help.";
         gameover=0;
-        arrow.src="assets/arrowRed.png"
+        arrow.src="assets/arrowRed.png";
         miss = 1;
         break;
     }
