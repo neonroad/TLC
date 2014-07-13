@@ -84,6 +84,9 @@ entrance = new room("entrance", null, "E");
 entrance.desc = "The doors shut behind you. Welcome to the Long Corridor.";
 map.push(entrance.symbol);
 
+exit = new room("exit", null, "X");
+exit.desc = "The end of the corridor! You made it!";
+
 //Room Text
 var roomText = document.getElementById("text");
 roomText.innerHTML = entrance.desc;
@@ -96,77 +99,95 @@ actionText.innerHTML = "Type your action below. <br> Press 'h' for help.";
 var newroom = function(){
   var newerroom = new room(null, null, null); // 3 types of rooms: pits, corridors & monsters
   
-  //random room generation
-  var rand = randomNumber(3,1);
-  //random pit generation
-  if(rand === 2){
-    rand = randomNumber(4,1);
-    //normal pit generation
-    if(rand === 1){
-      newerroom = new room("pit", null, "P");
-      newerroom.desc = "There is a large pit in this segment.";  
-    }
-    //gold pit generation
-    else if(rand === 2){
-      newerroom = new room("gold pit", null, "G");
-      newerroom.desc = "There is a large pit in this segment.";
-    }
-    //spike pit generation
-    else if(rand === 3){
-      newerroom = new room("spiked pit", null, "S");
-      newerroom.desc = "There is a large pit in this segment.";
-    }
-    else if(rand === 4){
-      newerroom = new room("junk pile", null, "J");
-      newerroom.desc = "There is a large pit in this segment.";
-    }
-    //default image
-    image.src="assets/pit.png";
+  //ENDING ~~ Thats it! Its over! This is where the game ends. 
+  if(map.length >= 20){ //If you have covered 20 or more tiles, end the game.
+    newerroom = exit; //The new room will always be an exit room.
+    image.src = "assets/end.png";
+    actionText.innerHTML = "Congratulations!";
+    actionBox.disabled = true;
+    setTimeout(function(){
+      image.src = "assets/endscreen.png";
+      actionText.innerHTML = "Your final score: " + score;
+      if(score > 70){
+        alert("Wow! You beat John's high score! Congrats!");
+      }
+    },2000);
   }
-
-  //monster room
-  else if(rand === 3){
-    rand = randomNumber(1,1);
-    if(rand === 1){
-      newerroom = new room("skeleton room", null, "M");
-      newerroom.desc = "A skeleton blocks the way!";
-      image.src = "assets/monster1.png";
-      monster = new creature('skeleton', 5, 3);
-    }
-
-  }
-
   else{
-    //graffiti generation
-    rand = randomNumber(10, 1);
-    if(rand === 4){
-      newerroom = new room("graffiti", null, "O");
-      newerroom.desc = "A normal segment of the corridor.";
-      rand = randomNumber(10, 1);
+    //random room generation
+    var rand = randomNumber(3,1);
+    //random pit generation
+    if(rand === 2){
+      rand = randomNumber(4,1);
+      //normal pit generation
       if(rand === 1){
-        newerroom.graffiti = "They call him John..";
+        newerroom = new room("pit", null, "P");
+        newerroom.desc = "There is a large pit in this segment.";  
       }
+      //gold pit generation
       else if(rand === 2){
-        newerroom.graffiti = "Spitting really does help, they say...";
+        newerroom = new room("gold pit", null, "G");
+        newerroom.desc = "There is a large pit in this segment.";
       }
+      //spike pit generation
       else if(rand === 3){
-        newerroom.graffiti = "Why do people hide gold in pits?";
+        newerroom = new room("spiked pit", null, "S");
+        newerroom.desc = "There is a large pit in this segment.";
       }
       else if(rand === 4){
-        newerroom.graffiti = "I heard that there are only about 20 segments in usual corridors...";
+        newerroom = new room("junk pile", null, "J");
+        newerroom.desc = "There is a large pit in this segment.";
       }
-      else{
-        newerroom.graffiti = "sos";
-      }
+      //default image
+      image.src="assets/pit.png";
     }
-    //normal room generation
+
+    //monster room
+    else if(rand === 3){
+      rand = randomNumber(1,1);
+      if(rand === 1){
+        newerroom = new room("skeleton room", null, "M");
+        newerroom.desc = "A skeleton blocks the way!";
+        image.src = "assets/monster1.png";
+        monster = new creature('skeleton', 5, 3);
+      }
+
+    }
+
     else{
-      newerroom = new room("normal", null, "O");
-      newerroom.desc = "A normal segment of the corridor.";  
+      //graffiti generation
+      rand = randomNumber(10, 1);
+      if(rand === 4){
+        newerroom = new room("graffiti", null, "O");
+        newerroom.desc = "A normal segment of the corridor.";
+        rand = randomNumber(10, 1);
+        if(rand === 1){
+          newerroom.graffiti = "They call him John..";
+        }
+        else if(rand === 2){
+          newerroom.graffiti = "Spitting really does help, they say...";
+        }
+        else if(rand === 3){
+          newerroom.graffiti = "Why do people hide gold in pits?";
+        }
+        else if(rand === 4){
+          newerroom.graffiti = "I heard that there are only about 20 segments in usual corridors...";
+        }
+        else{
+          newerroom.graffiti = "sos";
+        }
+      }
+      //normal room generation
+      else{
+        newerroom = new room("normal", null, "O");
+        newerroom.desc = "A normal segment of the corridor.";  
+      }
+      image.src = "assets/normal.png";
+      
     }
-    image.src = "assets/normal.png";
-    
   }
+  
+
   return newerroom;
 };
 
@@ -191,17 +212,25 @@ var updateStats = function(){
   if(nrg >= maxnrg){
     nrg = maxnrg;
   }
-  /*if(hp <= 0){
+  /*if(hp <= 0){ ~~Uncomment for strange results! Originally a test for default losses.
     hp = 0;
     gameOver("You died of mysterious causes!");
   } */
   if(nrg <= 0){
     nrg = 0;
   }
+  //STATUS BOX ~~Tells you whether you're alive or not, as well as a bunch of other things (score, energy, damage etc.)
   var status = document.getElementById("status");
   status.innerHTML = "HP: " + hp + "/" + maxhp + "<br> NRG: " + nrg + "/" + maxnrg + "<br> DMG: " + dmg + "<br> TRN: " + turn + "<br> SCORE: " + score;
+  if(hp<= maxhp/2){
+    status.style.backgroundColor = "#FF0000";
+  }
+  else{
+    status.style.backgroundColor = "#00FF00";
+  }
+
 };
-//============UPDATE============
+//============UPDATE============  ~~Where the magic happens. All actions get received and scanned through here. good luck exploring through it.
 var update = function(){
   
   
@@ -241,7 +270,7 @@ var update = function(){
           turn++;
         }
         else if(roomie.symbol === 'M'){
-          actionText.innerHTML = "You can't wait while theres a monster in front of you!";
+          actionText.innerHTML = "You can't wait while there is a monster in front of you!";
         }
         else{
           actionText.innerHTML= "You wait, restoring your stats.";
