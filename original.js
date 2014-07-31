@@ -12,6 +12,7 @@ var gameover = 0;
 var fallDamage = 0;
 var spit = 5;
 var searchRand = 10;
+var shopItem = "";
 
 //Misc.
 var arrow = document.getElementById("arrow");
@@ -46,19 +47,20 @@ var objectSpit = 0;
 var li = document.createElement("li");
 items = [];
 var invList = document.getElementById("invlist");
-item = function(name){
+item = function(name, worth){
   this.name = name;
+  this.worth = worth;
 };
 
 var randItem = function(){
   var itemGet = "";
   rand = randomNumber(2,1);
   if(rand === 1){
-    itemGet = new item('water');
+    itemGet = new item('water', 5);
     itemGet.fill = randomNumber(5,1);
   }
   else if(rand === 2){
-    itemGet = new item('magnifying glass');
+    itemGet = new item('magnifying glass', 10);
   }
   return itemGet;
 };
@@ -105,17 +107,18 @@ var newroom = function(){
     image.src = "assets/end.png";
     actionText.innerHTML = "Congratulations!";
     actionBox.disabled = true;
+    score +=100;
     setTimeout(function(){
       image.src = "assets/endscreen.png";
       actionText.innerHTML = "Your final score: " + score;
-      if(score > 70){
+      if(score > 170){
         alert("Wow! You beat John's high score! Congrats!");
       }
     },2000);
   }
   else{
     //random room generation
-    var rand = randomNumber(3,1);
+    var rand = randomNumber(4,1);
     //random pit generation
     if(rand === 2){
       rand = randomNumber(4,1);
@@ -153,6 +156,15 @@ var newroom = function(){
       }
 
     }
+    //shop room
+    else if(rand === 4 && place >= 5){
+      rand = randomNumber(1,1);
+      newerroom = new room("shop", null, "$");
+      newerroom.desc = "A shop for buying stuff in exchange for gold.";
+      image.src = "assets/shop.png";
+      shopItem = randItem();
+      
+    }
 
     else{
       //graffiti generation
@@ -174,7 +186,7 @@ var newroom = function(){
           newerroom.graffiti = "I heard that there are only about 20 segments in usual corridors...";
         }
         else{
-          newerroom.graffiti = "sos";
+          newerroom.graffiti = "Who made this corridor?!";
         }
       }
       //normal room generation
@@ -391,7 +403,7 @@ var update = function(){
                   gameOver("A skeleton defeated you while you tried to leave. <br> How rude of you!");
                 },2000);
               }
-              actionBox.disabled = false;
+              
             }
           }
           else{
@@ -451,6 +463,7 @@ var update = function(){
                 nrg-=4;
                 updateStats();
                 turn ++;
+                place++
                 roomie = newroom();
                 updateRoomText();
               }
@@ -540,6 +553,10 @@ var update = function(){
           else if(roomie.symbol === "M"){
             actionText.innerHTML = "The " + monster.name + ":<br>" + "HP: " + monster.hp + "<br>" + "DMG: " + monster.dmg;
           }
+          //shop search
+          else if(roomie.symbol === "$"){
+            actionText.innerHTML = "A shop in the middle of the corridor. I wonder how business is going?";
+          }
           //unknown search
           else{
             actionText.innerHTML = "What... is this?";
@@ -560,7 +577,7 @@ var update = function(){
         turn++;
         break;
       
-      //spit
+      //spit action
       case "sp":
       case "spit":
       case "SP":
@@ -591,6 +608,10 @@ var update = function(){
             if(roomie.name === "skeleton room"){
               actionText.innerHTML = "*splat* <br> The skeleton looks sad.";
             }
+          }
+          //shop spit
+          else if(roomie.symbol === "$"){
+            actionText.innerHTML = "'Oi! Watch where you're spitting!'";
           }
           //unknown spit
           else{
@@ -717,6 +738,7 @@ var update = function(){
                     updateRoomText();
                     updateStats();
                     turn++;
+                    place++
                     updateStats();
 
                   }, 1000);
@@ -725,8 +747,33 @@ var update = function(){
               
             }
           }
+          else if(roomie.symbol === "$"){
+            actionText.innerHTML = "'Hey! You wanna tussle or what? Yeah, I thought so.'";
+          }
           else{
             actionText.innerHTML = "You fight your inner conscious. <br> Just kidding. There's nothing to fight here.";
+          }
+          break;
+        //pay action
+        case "pay":
+        case "p":
+          if(roomie.symbol === "$"){
+            alert("Welcome! Today we have " + shopItem.name + " on sale for only " + shopItem.worth + " gold!"); //announce to the player what is on sale
+            sell = confirm("Are you interested?");
+            if(sell === true && score >= shopItem.worth){
+              actionText.innerHTML = "Thank you for your payment! <br> <br> -"+ shopItem.worth + " gold";
+              
+              score-=shopItem.worth;
+            }
+            else if(sell === true && score < shopItem.worth){
+              actionText.innerHTML = "Thank you for-- Hey, wait a sec! You're broke! <br> Come back when you're not so poor!";
+            }
+            else{
+              actionText.innerHTML = "Get outta here, then! You're scaring away my customers.";
+            }
+          }
+          else{
+            actionText.innerHTML = "You will pay for wasting my time!<br><br>There is no shop to pay.";
           }
           break;
         
@@ -826,6 +873,14 @@ var update = function(){
               actionText.innerHTML = "Using things in your inventory can help you on your quest. <br> Type the object you wish to use in the popup box. <br> Some items are consumed immediately.";
               break;
             
+            case "fight":
+            case "f":
+            case "Fight":
+            case "FIGHT":
+            case "F":
+              actionText.innerHTML = "Fight a monster in front of you equal to your damage, as well as take the monster's damage.";
+              break;
+
             //exit help
             default:
               actionText.innerHTML = "Exiting help. <br> Type your action below. <br> Type 'h' or 'help' to get back to the help screen.";
