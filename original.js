@@ -7,12 +7,15 @@ var nrg = 10;
 var maxnrg = 10;
 var dmg = 3;
 var turn = 0;
-var score = 0;
+var score = 120;
 var gameover = 0;
 var fallDamage = 0;
 var spit = 5;
 var searchRand = 10;
 var shopItem = "";
+var amuletGet = 0; //We only want one amulet to exist in one game.
+var revive = 0;
+var enchantment = ""; //Amulet enchantment
 
 //Misc.
 var arrow = document.getElementById("arrow");
@@ -54,13 +57,31 @@ item = function(name, worth){
 
 var randItem = function(){
   var itemGet = "";
-  rand = randomNumber(2,1);
+  rand = randomNumber(3,1);
   if(rand === 1){
     itemGet = new item('water', 5);
     itemGet.fill = randomNumber(5,1);
   }
   else if(rand === 2){
     itemGet = new item('magnifying glass', 10);
+  }
+  else if(rand === 3 && amuletGet === 0){
+    itemGet = new item('amulet', 15);
+    itemGet.enchantment = randomNumber(2,1);
+    if(itemGet.enchantment === 1){
+      itemGet.enchantment = "life saving";
+      enchantment = "life saving";
+      revive = 1;
+
+    }
+    else{
+      itemGet.enchantment = "strangling";
+      enchantment = "strangling";
+    }
+    amuletGet = 1; // Saying "Hey, an amulet exists, don't give me any more!"
+  }
+  else if(rand === 3 && amuletGet === 1){
+    itemGet = new item('punching glove', 10);
   }
   return itemGet;
 };
@@ -103,10 +124,10 @@ var newroom = function(){
   
   //ENDING ~~ Thats it! Its over! This is where the game ends. 
   if(map.length >= 20){ //If you have covered 20 or more tiles, end the game.
+    actionBox.disabled = true;
     newerroom = exit; //The new room will always be an exit room.
     image.src = "assets/end.png";
     actionText.innerHTML = "Congratulations!";
-    actionBox.disabled = true;
     score +=100;
     setTimeout(function(){
       image.src = "assets/endscreen.png";
@@ -159,6 +180,7 @@ var newroom = function(){
     //shop room
     else if(rand === 4 && place >= 5){
       rand = randomNumber(1,1);
+      payed = 0;
       newerroom = new room("shop", null, "$");
       newerroom.desc = "A shop for buying stuff in exchange for gold.";
       image.src = "assets/shop.png";
@@ -230,6 +252,11 @@ var updateStats = function(){
   } */
   if(nrg <= 0){
     nrg = 0;
+  }
+
+  if(amuletGet === 1 && enchantment === "strangling"){
+
+    hp-=2;
   }
   //STATUS BOX ~~Tells you whether you're alive or not, as well as a bunch of other things (score, energy, damage etc.)
   var status = document.getElementById("status");
@@ -310,10 +337,34 @@ var update = function(){
             image.src="assets/spike.png";
             console.log("died");
             actionText.innerHTML = "You fell in the pit, only to be met with a spiky doom!";
-            setTimeout(function(){
-              gameOver("You died from falling in a spike pit.");
-              console.log(gameover);
-            },5000);
+            setTimeout(function(){ //Life saving
+              if(revive === 1){
+                i = 0;
+                actionText.innerHTML = "Your amulet shatters, and you are brought back to life! What a miracle!";
+                image.src = "assets/revive.png";
+                roomie = newroom();
+                updateRoomText();
+                hp = maxhp;
+                nrg = maxnrg;
+                turn ++;
+                revive = 0;
+                actionBox.disabled = false;
+                actionBox.select();
+                for(i=0; i<items.length; i++){
+                if(items[i].name === 'amulet'){
+                  items.splice(i, 1);
+                  invList.removeChild(invList.childNodes[i+1]);
+                }
+              }
+
+              }
+              else{
+                setTimeout(function(){
+                  gameOver("You died from falling in a spike pit.");
+                  console.log(gameover);
+                },1000);
+              }
+            }, 2000);
           }
           //gold pit
           else if(choice === true && roomie.symbol === "G"){
@@ -329,6 +380,7 @@ var update = function(){
               actionText.innerHTML = "You crawl out of the pit.";
               turn ++;
               actionBox.disabled = false;
+              actionBox.select();
             }, 3000);
             
           }
@@ -370,8 +422,9 @@ var update = function(){
               roomie = newroom();
               updateRoomText();
               actionBox.disabled = false;
+              actionBox.select();
             },3000);
-            
+            actionBox.select();
             
           }
           //refuse walking into pit
@@ -458,17 +511,19 @@ var update = function(){
 
               if(rand === 2){
                 actionBox.disabled = false;
+                actionBox.select();
                 actionText.innerHTML = "... and the skeleton shatters as you fly through!";
                 console.log("succes skeleton jump kick");
                 nrg-=4;
                 updateStats();
                 turn ++;
-                place++
+                place++;
                 roomie = newroom();
                 updateRoomText();
               }
               else{
                 actionBox.disabled = false;
+                actionBox.select();
                 actionText.innerHTML = "... but the skeleton slashes you back down, making you take " + (monster.dmg+3) + " damage!";
                 image.src = "assets/monster1.png";
                 hp -= monster.dmg + 3;
@@ -697,6 +752,7 @@ var update = function(){
               setTimeout(function(){
                 image.src = "assets/monster1.png";  
                 actionBox.disabled = false;
+                actionBox.select();
                 actionText.innerHTML = "You deal " + dmg + " damage to the skeleton!" + "<br>------<br> The skeleton does " + monster.dmg + " damage to you in return!";
                 monster.hp -= dmg;
                 hp -= monster.dmg;
@@ -714,7 +770,6 @@ var update = function(){
                 }
                 else if(monster.hp <= 0){
                   rand = randomNumber(10, 1);
-                  var lootItem = randItem();
                   image.src = "assets/monster1lose.png";
                   actionText.innerHTML = "You won the fight! <br> +"+ rand +" gold!";
                   score += rand;
@@ -722,6 +777,7 @@ var update = function(){
                   setTimeout(function(){
                     rand = randomNumber(5,1);
                     if(rand === 1){
+                      var lootItem = randItem();
                       actionText.innerHTML = "You found a " + lootItem.name + " in the pile of bones! <br> You continue.";
                       items.push(lootItem);
                       li = document.createElement("li");
@@ -734,11 +790,12 @@ var update = function(){
                       actionText.innerHTML = "You found nothing in the bone pile. <br> You continue.";
                     }
                     actionBox.disabled = false;
+                    actionBox.select();
                     roomie = newroom();
                     updateRoomText();
                     updateStats();
                     turn++;
-                    place++
+                    place++;
                     updateStats();
 
                   }, 1000);
@@ -757,23 +814,39 @@ var update = function(){
         //pay action
         case "pay":
         case "p":
-          if(roomie.symbol === "$"){
+        case "PAY":
+        case "P":
+        case "Pay":
+          if(roomie.symbol === "$" && payed === 0){
             alert("Welcome! Today we have " + shopItem.name + " on sale for only " + shopItem.worth + " gold!"); //announce to the player what is on sale
             sell = confirm("Are you interested?");
-            if(sell === true && score >= shopItem.worth){
+            if(sell === true && score >= shopItem.worth && payed === 0){
               actionText.innerHTML = "Thank you for your payment! <br> <br> -"+ shopItem.worth + " gold";
               
               score-=shopItem.worth;
+              items.push(shopItem);
+              li = document.createElement("li");
+              var node = document.createTextNode(shopItem.name);
+              li.appendChild(node);
+              invList.appendChild(li);
+
+              payed = 1;
             }
             else if(sell === true && score < shopItem.worth){
               actionText.innerHTML = "Thank you for-- Hey, wait a sec! You're broke! <br> Come back when you're not so poor!";
+            }
+            else if(payed === 1){
+              actionText.innerHTML = "I got nothing else. Go see the guy up ahead. If there even is a guy up ahead. <br> Why are there so many shops here?";
             }
             else{
               actionText.innerHTML = "Get outta here, then! You're scaring away my customers.";
             }
           }
+          else if(payed === 1){
+              actionText.innerHTML = "I got nothing else. Scram.";
+            }
           else{
-            actionText.innerHTML = "You will pay for wasting my time!<br><br>There is no shop to pay.";
+            actionText.innerHTML = "You will pay for wasting my time!<br><br>...There is no shop to pay.";
           }
           break;
         
