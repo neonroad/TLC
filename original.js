@@ -16,6 +16,7 @@ var shopItem = "";
 var amuletGet = 0; //We only want one amulet to exist in one game.
 var revive = 0;
 var enchantment = ""; //Amulet enchantment
+var scavenger = 0; //Additional gold
 
 //Misc.
 var arrow = document.getElementById("arrow");
@@ -55,20 +56,38 @@ item = function(name, worth){
   this.worth = worth;
 };
 
+var amuletSave = function(){
+  actionBox.disabled = true;
+  actionText.innerHTML += "<br>But your amulet shatters, and you are brought back to life! What a miracle!";
+  image.src = "assets/revive.png";
+  setTimeout(function(){
+    roomie = newroom();
+    updateRoomText();
+    hp = maxhp;
+    nrg = maxnrg;
+    turn ++;
+    revive = 0;
+    updateStats();
+    actionBox.disabled = false;
+    actionBox.select();
+    
+  }, 4000); 
+};
+
 var randItem = function(){
   var itemGet = "";
   rand = randomNumber(3,1);
-  if(rand === 1){
+  if(rand === 3){
     itemGet = new item('water', 5);
     itemGet.fill = randomNumber(5,1);
   }
   else if(rand === 2){
     itemGet = new item('magnifying glass', 10);
   }
-  else if(rand === 3 && amuletGet === 0){
+  else if(rand === 1 && amuletGet === 0){
     itemGet = new item('amulet', 15);
     itemGet.enchantment = randomNumber(2,1);
-    if(itemGet.enchantment === 1){
+    /* if(itemGet.enchantment === 1){
       itemGet.enchantment = "life saving";
       enchantment = "life saving";
       revive = 1;
@@ -78,9 +97,10 @@ var randItem = function(){
       itemGet.enchantment = "strangling";
       enchantment = "strangling";
     }
+    */
     amuletGet = 1; // Saying "Hey, an amulet exists, don't give me any more!"
   }
-  else if(rand === 3 && amuletGet === 1){
+  else if(rand === 1 && amuletGet === 1){
     itemGet = new item('punching glove', 10);
   }
   return itemGet;
@@ -120,7 +140,7 @@ actionText.innerHTML = "Type your action below. <br> Press 'h' for help.";
 
 //New Room
 var newroom = function(){
-  var newerroom = new room(null, null, null); // 3 types of rooms: pits, corridors & monsters
+  var newerroom = new room(null, null, null); // 4 types of rooms: shops, pits, corridors & monsters
   
   //ENDING ~~ Thats it! Its over! This is where the game ends. 
   if(map.length >= 20){ //If you have covered 20 or more tiles, end the game.
@@ -132,8 +152,11 @@ var newroom = function(){
     setTimeout(function(){
       image.src = "assets/endscreen.png";
       actionText.innerHTML = "Your final score: " + score;
-      if(score > 170){
+      if(score > 196){
         alert("Wow! You beat John's high score! Congrats!");
+      }
+      else if(score === 196){
+        alert("You tied with John's score! Congrats!");
       }
     },2000);
   }
@@ -253,11 +276,6 @@ var updateStats = function(){
   if(nrg <= 0){
     nrg = 0;
   }
-
-  if(amuletGet === 1 && enchantment === "strangling"){
-
-    hp-=2;
-  }
   //STATUS BOX ~~Tells you whether you're alive or not, as well as a bunch of other things (score, energy, damage etc.)
   var status = document.getElementById("status");
   status.innerHTML = "HP: " + hp + "/" + maxhp + "<br> NRG: " + nrg + "/" + maxnrg + "<br> DMG: " + dmg + "<br> TRN: " + turn + "<br> SCORE: " + score;
@@ -337,34 +355,16 @@ var update = function(){
             image.src="assets/spike.png";
             console.log("died");
             actionText.innerHTML = "You fell in the pit, only to be met with a spiky doom!";
-            setTimeout(function(){ //Life saving
               if(revive === 1){
-                i = 0;
-                actionText.innerHTML = "Your amulet shatters, and you are brought back to life! What a miracle!";
-                image.src = "assets/revive.png";
-                roomie = newroom();
-                updateRoomText();
-                hp = maxhp;
-                nrg = maxnrg;
-                turn ++;
-                revive = 0;
-                actionBox.disabled = false;
-                actionBox.select();
-                for(i=0; i<items.length; i++){
-                if(items[i].name === 'amulet'){
-                  items.splice(i, 1);
-                  invList.removeChild(invList.childNodes[i+1]);
-                }
+                amuletSave();
               }
-
-              }
+              
               else{
                 setTimeout(function(){
                   gameOver("You died from falling in a spike pit.");
                   console.log(gameover);
                 },1000);
               }
-            }, 2000);
           }
           //gold pit
           else if(choice === true && roomie.symbol === "G"){
@@ -372,8 +372,8 @@ var update = function(){
             image.src="assets/gold.png";
             console.log("collected gold");
             rand = randomNumber(11,10);
-            score+=rand;
-            actionText.innerHTML = "You fell in the pit...<br> But some gold broke your fall! <br> Obtained $" + rand + "!";
+            score+=rand+scavenger;
+            actionText.innerHTML = "You fell in the pit...<br> But some gold broke your fall! <br> Obtained $" + (rand+scavenger) + "!";
             setTimeout(function(){
               roomie = newroom();
               updateRoomText();
@@ -391,7 +391,14 @@ var update = function(){
             actionText.innerHTML = "Ow! <br>You fell in a pit, and hurt yourself for " + fallDamage + " damage! <br> You crawl out of the pit. <br> Be more careful next time!";
             hp-=fallDamage;
             if(hp <= 0){
-              gameOver("You fell to your death!");
+              if(revive === 1){
+                      
+                      amuletSave();
+
+              }
+              else{
+                gameOver("You fell to your death!");
+              }
             }
             else{
 
@@ -410,7 +417,7 @@ var update = function(){
             setTimeout(function(){
               actionText.innerHTML = "You got " + junkItem.name + "! <br> <br> You crawled out the pit.";
               if(objectSpit === 1){
-                actionText.innerHTML = "You got " + junkItem.name + "! <br><br> You wiped the spit off. <br> You crawled out the pit.";
+                actionText.innerHTML += "<br>You wiped off the spit.";
                 objectSpit = 0;
               }
               items.push(junkItem);
@@ -448,12 +455,18 @@ var update = function(){
             }
             else{
               actionText.innerHTML = "The skeleton awkwardly blocks your way, and slashes you away for " + monster.dmg + " damage!";
-              hp -= rand;
+              hp -= monster.dmg;
               if(hp <=0){
                 image.src = "assets/monster1win.png";
                 actionBox.disabled = true;
                 setTimeout(function(){
-                  gameOver("A skeleton defeated you while you tried to leave. <br> How rude of you!");
+                  if(revive === 1){
+                      
+                      amuletSave();
+                  }
+                  else{
+                    gameOver("A skeleton defeated you while you tried to leave. <br> How rude of you!");
+                  }
                 },2000);
               }
               
@@ -531,7 +544,13 @@ var update = function(){
                   actionBox.disabled = true;
                   image.src = "assets/monster1win.png";
                   setTimeout(function(){
-                    gameOver("You tried to look cool, but a skeleton embarrassed you.");
+                    if(revive === 1){
+                      
+                      amuletSave();
+                    }
+                    else{
+                      gameOver("You tried to look cool, but a skeleton embarrassed you.");
+                    }
                   },2000);
                 }
                 nrg -=4;
@@ -590,15 +609,15 @@ var update = function(){
           }
           //normal pit search
           else if(roomie.symbol === "P"){
-            actionText.innerHTML = "It looks really dark. <br> You wonder how far down a bottomless pit really is.";
+            actionText.innerHTML = "The pit looks really dark.";
           }
           //spike pit search
           else if(roomie.symbol === "S"){
-            actionText.innerHTML = "It looks really dark. <br> You wonder how far down a bottomless pit really is.";
+            actionText.innerHTML = "The pit looks really dark.";
           }
           //gold pit search
           else if(roomie.symbol === "G"){
-            actionText.innerHTML = "It looks really dark. <br> You wonder how far down... hey, wait a second! That looked like a little sparkle!";
+            actionText.innerHTML = "The pit looks really dark...<br> Hey, wait a second! That looked like a little sparkle!";
           }
           //junk pit search
           else if(roomie.symbol === "J"){
@@ -610,7 +629,7 @@ var update = function(){
           }
           //shop search
           else if(roomie.symbol === "$"){
-            actionText.innerHTML = "A shop in the middle of the corridor. I wonder how business is going?";
+            actionText.innerHTML = "A shop in the middle of the corridor.";
           }
           //unknown search
           else{
@@ -731,6 +750,27 @@ var update = function(){
                 }
               }
             }
+            else if(use === 'amulet'){
+              for(i=0; i<items.length; i++){
+                if(items[i].name === 'amulet'){
+                  actionText.innerHTML = "You put on the amulet.";
+                  rand = randomNumber(2,1);
+                  if(rand === 1){
+                    items[i].enchantment = "life saving";
+                    actionText.innerHTML += "<br> You feel protected.";
+                    revive = 1;
+                  }
+                  else{
+                    items[i].enchantment = "gold";
+                    actionText.innerHTML += "<br> You feel greedy.";
+                    scavenger += 20;
+                  }
+                  items.splice(i, 1);
+                  invList.removeChild(invList.childNodes[i+1]);
+                  return;
+                }
+              }
+            }
             //unknown item usage
             else{
               alert("Never heard of it.");
@@ -764,15 +804,20 @@ var update = function(){
                   image.src = "assets/monster1win.png";
                   actionText.innerHTML = "Fatal damage! <br>You die...";
                   setTimeout(function(){
-                    gameOver("A skeleton has slain you."); 
-
+                    if(revive === 1){
+                      
+                      amuletSave();
+                    }
+                    else{
+                      gameOver("A skeleton has slain you."); 
+                    }
                   }, 3000);
                 }
                 else if(monster.hp <= 0){
                   rand = randomNumber(10, 1);
                   image.src = "assets/monster1lose.png";
-                  actionText.innerHTML = "You won the fight! <br> +"+ rand +" gold!";
-                  score += rand;
+                  actionText.innerHTML = "You won the fight! <br> +"+ (rand + scavenger) +" gold!";
+                  score += rand+scavenger;
                   actionBox.disabled = true;
                   setTimeout(function(){
                     rand = randomNumber(5,1);
@@ -808,7 +853,7 @@ var update = function(){
             actionText.innerHTML = "'Hey! You wanna tussle or what? Yeah, I thought so.'";
           }
           else{
-            actionText.innerHTML = "You fight your inner conscious. <br> Just kidding. There's nothing to fight here.";
+            actionText.innerHTML = "There's nothing to fight here.";
           }
           break;
         //pay action
@@ -846,7 +891,7 @@ var update = function(){
               actionText.innerHTML = "I got nothing else. Scram.";
             }
           else{
-            actionText.innerHTML = "You will pay for wasting my time!<br><br>...There is no shop to pay.";
+            actionText.innerHTML = "There is no shop to pay.";
           }
           break;
         
