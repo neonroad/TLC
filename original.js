@@ -62,21 +62,20 @@ var amuletSave = function(){
   image.src = "assets/revive.png";
   setTimeout(function(){
     roomie = newroom();
-    updateRoomText();
-    hp = maxhp;
-    nrg = maxnrg;
     turn ++;
     revive = 0;
-    updateStats();
     actionBox.disabled = false;
     actionBox.select();
+    hp = maxhp;
+    nrg = maxnrg;
+    updateStats();
     
-  }, 4000); 
+  }, 1000); 
 };
 
 var randItem = function(){
   var itemGet = "";
-  rand = randomNumber(3,1);
+  rand = randomNumber(1,1);
   if(rand === 3){
     itemGet = new item('water', 5);
     itemGet.fill = randomNumber(5,1);
@@ -269,10 +268,7 @@ var updateStats = function(){
   if(nrg >= maxnrg){
     nrg = maxnrg;
   }
-  /*if(hp <= 0){ ~~Uncomment for strange results! Originally a test for default losses.
-    hp = 0;
-    gameOver("You died of mysterious causes!");
-  } */
+  
   if(nrg <= 0){
     nrg = 0;
   }
@@ -590,7 +586,6 @@ var update = function(){
         rand = randomNumber(searchRand, 1);
         //find something
         if(rand === 1){
-          console.log("found");
           //if searching regular room
           if(roomie.symbol === "O"){
             //grafitti
@@ -599,13 +594,13 @@ var update = function(){
             }
             //no grafitti
             else{
-              actionText.innerHTML = "You notice how long the corridor really is.";  
+              actionText.innerHTML = "Nothing of interest here.";  
             }
             
           }
           //entrance search
           else if(map[place] === "E"){
-            actionText.innerHTML = "Heck, this is only the beginning!";
+            actionText.innerHTML = "You take one good look at the doors.";
           }
           //normal pit search
           else if(roomie.symbol === "P"){
@@ -657,7 +652,6 @@ var update = function(){
       case "SP":
       case "Spit":
       case "SPIT":
-        console.log("spit");
         //if you have required number of spit
         if(spit > 0){
           //regular room spit
@@ -802,7 +796,7 @@ var update = function(){
                 if(hp <=0){
                   actionBox.disabled = true;
                   image.src = "assets/monster1win.png";
-                  actionText.innerHTML = "Fatal damage! <br>You die...";
+                  actionText.innerHTML = "Fatal damage! <br>You black out...";
                   setTimeout(function(){
                     if(revive === 1){
                       
@@ -903,7 +897,6 @@ var update = function(){
       case "HELP":
       case "Help":
         //open help
-        console.log("Help screen");
         var helpScreen = function(){
           actionText.innerHTML = "Displaying help.";
           
@@ -916,7 +909,6 @@ var update = function(){
             //help hp
             case "hp":
             case "HP":
-              console.log("asked for hp");
               actionText.innerHTML = "HP is your health. When it reaches 0, you die. Saying 'wait' will restore it by 1 pts.";
               break;
             //help energy
@@ -924,7 +916,6 @@ var update = function(){
             case "energy":
             case "ENERGY":
             case "NRG":
-              console.log("asked for nrg");
               actionText.innerHTML = "NRG is your energy. When it reaches 0, you can't perform certain actions. Waiting restores this by 2 points.";
               break;
             //help turn
@@ -932,7 +923,6 @@ var update = function(){
             case "turn":
             case "TRN":
             case "Turn":
-              console.log("asked about turn");
               actionText.innerHTML = "These are the number of turns that have passed. A turn only applies when you perform an action, or time advances.";
               break;
             //help damage
@@ -941,7 +931,6 @@ var update = function(){
             case"Damage":
             case"damage":
             case"DAMAGE":
-              console.log("asked about damage");
               actionText.innerHTML = "Damage is the amount that affects the enemy's hp. The higher it is, the more damage you do.";
               break;
             //help damage
@@ -952,7 +941,6 @@ var update = function(){
             case"GOLD":
             case"gold":
             case"$":
-              console.log("asked about score");
               actionText.innerHTML = "This is your score, counted with money. <br> Try to get the most before you leave the corridor!.";
               break;
             //help walk
@@ -960,7 +948,6 @@ var update = function(){
             case "w":
             case "WALK":
             case "Walk":
-              console.log("asked about walking.");
               actionText.innerHTML = "Walking: Walking uses up a turn and continues you to the next segment of the corridor. Can also be used with 'w'.";
               break;
             //help jump
@@ -968,7 +955,6 @@ var update = function(){
             case "j":
             case "JUMP":
             case "Jump":
-              console.log("asked about jumping");
               actionText.innerHTML = "Jumping: Jumping uses up a turn and 2 of your energy, but can skip over some traps. Use 'wait' to regain energy. Can also be used with 'j'.";
               break;
             //help search
@@ -977,7 +963,6 @@ var update = function(){
             case "Search":
             case "S":
             case "SEARCH":
-              console.log("asked about searching");
               actionText.innerHTML = "Searching allows you to look for clues in a segment. It takes up one turn. 's' can be used as well.";
               break;
             
@@ -987,7 +972,6 @@ var update = function(){
             case "Use":
             case "USE":
             case "U":
-              console.log("asked about using");
               actionText.innerHTML = "Using things in your inventory can help you on your quest. <br> Type the object you wish to use in the popup box. <br> Some items are consumed immediately.";
               break;
             
@@ -997,6 +981,14 @@ var update = function(){
             case "FIGHT":
             case "F":
               actionText.innerHTML = "Fight a monster in front of you equal to your damage, as well as take the monster's damage.";
+              break;
+
+            case "p":
+            case "pay":
+            case "PAY":
+            case "Pay":
+            case "P":
+              actionText.innerHTML = "Finds out what the shop is selling as well as confirms the purchase.";
               break;
 
             //exit help
