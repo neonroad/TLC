@@ -15,7 +15,7 @@ var searchRand = 10;
 var shopItem = "";
 var amuletGet = 0; //We only want one amulet to exist in one game.
 var revive = 0;
-var enchantment = ""; //Amulet enchantment
+var amuletEnchantment = ""; //Amulet enchantment
 var scavenger = 0; //Additional gold
 
 //Misc.
@@ -68,6 +68,7 @@ var amuletSave = function(){
     actionBox.select();
     hp = maxhp;
     nrg = maxnrg;
+    updateRoomText();
     updateStats();
     
   }, 1000); 
@@ -75,17 +76,16 @@ var amuletSave = function(){
 
 var randItem = function(){
   var itemGet = "";
-  rand = randomNumber(1,1);
+  rand = randomNumber(3,1);
   if(rand === 3){
     itemGet = new item('water', 5);
     itemGet.fill = randomNumber(5,1);
   }
   else if(rand === 2){
-    itemGet = new item('magnifying glass', 10);
+    itemGet = new item('glasses', 10);
   }
   else if(rand === 1 && amuletGet === 0){
     itemGet = new item('amulet', 15);
-    itemGet.enchantment = randomNumber(2,1);
     /* if(itemGet.enchantment === 1){
       itemGet.enchantment = "life saving";
       enchantment = "life saving";
@@ -211,7 +211,7 @@ var newroom = function(){
     }
 
     else{
-      //graffiti generation
+      //graffiti generation -- usually little tips that help people who are so bored that they search a normal looking segment.
       rand = randomNumber(10, 1);
       if(rand === 4){
         newerroom = new room("graffiti", null, "O");
@@ -221,13 +221,19 @@ var newroom = function(){
           newerroom.graffiti = "They call him John..";
         }
         else if(rand === 2){
-          newerroom.graffiti = "Spitting really does help, they say...";
+          newerroom.graffiti = "Spitting really does help find out what lies on the bottom of pits, they say...";
         }
         else if(rand === 3){
           newerroom.graffiti = "Why do people hide gold in pits?";
         }
         else if(rand === 4){
           newerroom.graffiti = "I heard that there are only about 20 segments in usual corridors...";
+        }
+        else if(rand === 5){
+          newerroom.graffiti = "Amulets can either be good or bad. Remember to use them if you wish to learn the effect.";
+        }
+        else if(rand === 6){
+          newerroom.graffiti = "Try to beat John's score of 196!";
         }
         else{
           newerroom.graffiti = "Who made this corridor?!";
@@ -383,7 +389,7 @@ var update = function(){
           //regular pit
           else if(choice === true && roomie.symbol === "P"){
             console.log("deep pit hit");
-            fallDamage = randomNumber(5, 1); 
+            fallDamage += randomNumber(5, 1); 
             actionText.innerHTML = "Ow! <br>You fell in a pit, and hurt yourself for " + fallDamage + " damage! <br> You crawl out of the pit. <br> Be more careful next time!";
             hp-=fallDamage;
             if(hp <= 0){
@@ -732,11 +738,11 @@ var update = function(){
                 }
               }
             }
-            // if using magnifying glass
-            else if(use === 'magnifying glass'){
+            // if using glasses
+            else if(use === 'glasses'){
               for(i=0; i<items.length; i++){
-                if(items[i].name === 'magnifying glass'){
-                  actionText.innerHTML = "You use the magnifying glass. <br> <br> You are so observant!";
+                if(items[i].name === 'glasses'){
+                  actionText.innerHTML = "You put on the glasses. <br> <br> You are so observant!";
                   searchRand = 1;
                   items.splice(i, 1);
                   invList.removeChild(invList.childNodes[i+1]);
@@ -748,11 +754,17 @@ var update = function(){
               for(i=0; i<items.length; i++){
                 if(items[i].name === 'amulet'){
                   actionText.innerHTML = "You put on the amulet.";
-                  rand = randomNumber(2,1);
+                  rand = randomNumber(3,1);
                   if(rand === 1){
                     items[i].enchantment = "life saving";
                     actionText.innerHTML += "<br> You feel protected.";
                     revive = 1;
+                  }
+                  else if(rand === 2){
+                    items[i].enchantment = "weight";
+                    actionText.innerHTML += "<br> This is super heavy!";
+                    fallDamage = 5;
+
                   }
                   else{
                     items[i].enchantment = "gold";
@@ -761,6 +773,7 @@ var update = function(){
                   }
                   items.splice(i, 1);
                   invList.removeChild(invList.childNodes[i+1]);
+                  amuletEnchantment = items[i].enchantment;
                   return;
                 }
               }
@@ -909,7 +922,7 @@ var update = function(){
             //help hp
             case "hp":
             case "HP":
-              actionText.innerHTML = "HP is your health. When it reaches 0, you die. Saying 'wait' will restore it by 1 pts.";
+              actionText.innerHTML = "HP is your health. When it reaches 0, you die. Saying 'wait' will restore it by 1 point.";
               break;
             //help energy
             case "nrg":
@@ -931,7 +944,7 @@ var update = function(){
             case"Damage":
             case"damage":
             case"DAMAGE":
-              actionText.innerHTML = "Damage is the amount that affects the enemy's hp. The higher it is, the more damage you do.";
+              actionText.innerHTML = "Damage is the amount that affects the enemy's hp during a fight. The higher it is, the more damage you do, and the faster the enemy will die.";
               break;
             //help damage
             case"score":
@@ -941,7 +954,7 @@ var update = function(){
             case"GOLD":
             case"gold":
             case"$":
-              actionText.innerHTML = "This is your score, counted with money. <br> Try to get the most before you leave the corridor!.";
+              actionText.innerHTML = "This is your score, counted with money. <br> Try to get as much as you can before you leave the corridor!.";
               break;
             //help walk
             case "walk":
