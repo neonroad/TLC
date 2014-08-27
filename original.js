@@ -514,7 +514,7 @@ var update = function(){
           }
 
           //monster jump attack
-          else if(roomie.symbol === "M"){
+          else if(roomie.symbol === "M" && amuletEnchantment !== "weight"){
             if(roomie.name === "skeleton room"){
               actionText.innerHTML = "You do an awesome jump kick...";
               console.log("jump kick");
@@ -563,6 +563,9 @@ var update = function(){
 
               },2000);
             }
+          }
+          else if(roomie.symbol === "M" && amuletEnchantment !== "weight"){
+            actionText.innerHTML = "Your amulet prevents you from jumping!";
           }
           //no pit
           else{
@@ -774,6 +777,18 @@ var update = function(){
                   items.splice(i, 1);
                   invList.removeChild(invList.childNodes[i+1]);
                   amuletEnchantment = items[i].enchantment;
+                  return;
+                }
+              }
+            }
+            else if(use === 'punching glove'){
+              for(i=0; i<items.length; i++){
+                if(items[i].name === 'punching glove'){
+                  actionText.innerHTML = "You put on the gloves. You can really pack a punch!";
+                  dmg += 1;
+                  updateStats();
+                  items.splice(i, 1);
+                  invList.removeChild(invList.childNodes[i+1]);
                   return;
                 }
               }
