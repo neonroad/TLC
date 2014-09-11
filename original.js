@@ -329,6 +329,10 @@ var GROOL = function(length){
   document.body.style.backgroundColor= "#"+groolHex+groolHex+groolHex+groolHex+groolHex+groolHex;
   if(grool >= place){
     actionText.innerHTML += "<br> YOU WERE EATEN BY THE GROOL";
+    gameOver("The gruel devoured you.");
+    if(revive === 1){
+      gameOver("The gruel devoured you and your amulet.");
+    }
 
   }
 }
@@ -968,7 +972,7 @@ var update = function(){
               for(i=0; i<items.length; i++){
                 if(items[i].name === 'flashlight'){
                   actionText.innerHTML = "You use the flashlight. <br> The darkness behind you backs up!";
-                  GROOL(items[i].power);
+                  GROOL(items[i].power * -1);
                   updateStats();
                   items.splice(i, 1);
                   invList.removeChild(invList.childNodes[i+1]);
