@@ -95,7 +95,7 @@ var randItem = function(){
   }
   else if(rand === 4){
     itemGet = new item('hourglass', 20);
-    itemGet.extend = randomNumber(20,1);
+    itemGet.extend = randomNumber(20,10);
   }
   else if(rand === 5){
     itemGet = new item('potion', 10);
@@ -472,6 +472,7 @@ var update = function(){
               updateRoomText();
               actionText.innerHTML = "You crawl out of the pit.";
               turn ++;
+              place++
               actionBox.disabled = false;
               actionBox.select();
             }, 3000);
@@ -486,7 +487,7 @@ var update = function(){
             if(hp <= 0){
               if(revive === 1){
                       
-                      amuletSave();
+                amuletSave();
 
               }
               else{
@@ -519,6 +520,7 @@ var update = function(){
               li.appendChild(node);
               invList.appendChild(li);
               turn ++;
+              place++
               roomie = newroom();
               updateRoomText();
               actionBox.disabled = false;
@@ -544,6 +546,7 @@ var update = function(){
               console.log("escaped");
               roomie = newroom();
               updateRoomText();
+              place++
               turn ++;
             }
             else{
@@ -575,11 +578,10 @@ var update = function(){
           actionText.innerHTML = "You move onward.";
           console.log("walked");
           roomie = newroom();
+          place++
           updateRoomText();
           turn ++;
         }
-
-        place++;
         break;
        
       //jump 
@@ -615,7 +617,7 @@ var update = function(){
               image.src = "assets/jumpkick.png";
               actionBox.disabled = true;
 
-              rand = randomNumber(4,1);
+              rand = randomNumber(3,1);
               setTimeout(function(){
 
               if(rand === 2){
@@ -868,7 +870,7 @@ var update = function(){
                   }
                   else if(rand === 3){
                     items[i].enchantment = "sleep";
-                    actionText.innerHTML += "<br> You feel tired...!";
+                    actionText.innerHTML += "<br> You feel tired...";
                     amuletEnchantment = "sleep";
                   }
                   else{
@@ -942,8 +944,8 @@ var update = function(){
                     maxhp += 5;
                   }
                   else if(items[i].effect === 5){
-                    actionText.innerHTML += "You feel rich!";
-                    score += 20;
+                    actionText.innerHTML += "You are blinded for a moment! <br> A feeling of darkness overcomes you...";
+                    grool = place - 5;
                   }
                   else{
                     actionText.innerHTML += "Nothing happens!";
