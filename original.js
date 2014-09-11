@@ -1168,7 +1168,7 @@ var update = function(){
             case "j":
             case "JUMP":
             case "Jump":
-              actionText.innerHTML = "Jumping: Jumping uses up a turn and 2 of your energy, but can skip over some traps. Use 'wait' to regain energy. Can also be used with 'j'.";
+              actionText.innerHTML = "Jumping: Jumping uses up a turn and 2 of your energy, but can skip over some traps. It also slows down the Grool. Use 'wait' to regain energy. Can also be used with 'j'.";
               break;
             //help search
             case "search":
@@ -1202,6 +1202,12 @@ var update = function(){
             case "Pay":
             case "P":
               actionText.innerHTML = "Finds out what the shop is selling as well as confirms the purchase.";
+              break;
+
+            case "grool":
+            case "Grool":
+            case "GROOL":   //NO ONE KNOWS ABOUT THE GROOL 
+              actionText.innerHTML = "N̟̖͙̱̱̥͖ͯ̿̀O̤̰̠̍̍ͦ͒̓̇͝ ̘͖̫͙̞͍̅̇͆O̝͇̤͙͛ͪ͞N̔͌̅ͣ͋E̠͍̮̬ ̲̲̱̝͇̙̏͛ͯK̮̭̣̣ͣ͂̂ͥͤ̂N̼̼̝̰̬̗͚͊̀Ô̪̥̗̳̽ͤ͐W̸̝̱̠̮̣̄Š̺̬͇̦̮ͪ̑ͫ͌͐̅ ̠̦̹͙̦̾͡Ă̞̯ͪ͒ͬ̍B͑̾ͭ̂O̫̘̗̪̖ͮ̏͊̓̾ͪ̚ͅU̴̦̳̳̼̺̳T̫̪̹̦ͥ̀̓͋ͭ̀ͥ ̼͇ͧ͜T̀̇ͩͨ̽̽̌H̰͍̰̠̹ͯ͑̑ͧͅE̴̙̩͔̪̜̙̓̽̋͊ͮ̈̚ ̴̝̬͙̼̰G̖͚̀̏̌̔ͪͧR͎̘̰̤͙̬ͩͅŐ̬̮̖͂̄̅̆ͧ̃O̟̜̬͙͠L͕̓̇̆͛̍ͧ͆";
               break;
 
             //exit help
