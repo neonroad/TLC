@@ -17,6 +17,7 @@ var amuletGet = 0; //We only want one amulet to exist in one game.
 var revive = 0;
 var amuletEnchantment = ""; //Amulet enchantment
 var scavenger = 0; //Additional gold
+var lastRoom = 20;
 
 //Misc.
 var arrow = document.getElementById("arrow");
@@ -72,11 +73,12 @@ var amuletSave = function(){
     updateStats();
     
   }, 1000); 
+  updateStats();
 };
 
 var randItem = function(){
   var itemGet = "";
-  rand = randomNumber(3,1);
+  rand = randomNumber(7,1);
   if(rand === 3){
     itemGet = new item('water', 5);
     itemGet.fill = randomNumber(5,1);
@@ -86,21 +88,26 @@ var randItem = function(){
   }
   else if(rand === 1 && amuletGet === 0){
     itemGet = new item('amulet', 15);
-    /* if(itemGet.enchantment === 1){
-      itemGet.enchantment = "life saving";
-      enchantment = "life saving";
-      revive = 1;
-
-    }
-    else{
-      itemGet.enchantment = "strangling";
-      enchantment = "strangling";
-    }
-    */
     amuletGet = 1; // Saying "Hey, an amulet exists, don't give me any more!"
   }
   else if(rand === 1 && amuletGet === 1){
     itemGet = new item('punching glove', 10);
+  }
+  else if(rand === 4){
+    itemGet = new item('hourglass', 20);
+    itemGet.extend = randomNumber(20,1);
+  }
+  else if(rand === 5){
+    itemGet = new item('potion', 10);
+    itemGet.effect = randomNumber(5,1);
+  }
+  else if(rand === 6){
+    itemGet = new item('medkit', 10);
+    itemGet.health = randomNumber(5,1);
+  }
+  else if(rand === 7){
+    itemGet = new item('flashlight', 10);
+    itemGet.power = randomNumber(20,1); //How far the gruel can get set back
   }
   return itemGet;
 };
@@ -111,7 +118,7 @@ var action = "";
 //Room List
 var map = [];
 var place = 0; //Current place where the player is
-
+var grool = -20; //Where the Grool is
 //Room Object
 room = function(name, desc, symbol){
   this.name = name;
@@ -142,7 +149,7 @@ var newroom = function(){
   var newerroom = new room(null, null, null); // 4 types of rooms: shops, pits, corridors & monsters
   
   //ENDING ~~ Thats it! Its over! This is where the game ends. 
-  if(map.length >= 20){ //If you have covered 20 or more tiles, end the game.
+  if(map.length >= lastRoom){ //If you have covered 20 or more tiles, end the game.
     actionBox.disabled = true;
     newerroom = exit; //The new room will always be an exit room.
     image.src = "assets/end.png";
@@ -264,6 +271,68 @@ var gameOver = function(cause){
   actionBox.disabled = true;
 };
 
+var GROOL = function(length){
+  grool += length;
+  var groolHex = "0";
+  if(place - 1 === grool){
+    groolHex = "1"; 
+  }
+  else if(place - 2 === grool){
+    groolHex = "2";
+  }
+  else if(place - 3 === grool){
+    groolHex = "3";
+  }
+  else if(place - 4 === grool){
+    groolHex = "4";
+  }
+  else if(place - 5 === grool){
+    groolHex = "5";
+  }
+  else if(place - 6 === grool){
+    groolHex = "6";
+  }
+  else if(place - 7 === grool){
+    groolHex = "7";
+  }
+  else if(place - 8 === grool){
+    groolHex = "8";
+  }
+  else if(place - 9 === grool){
+    groolHex = "9";
+  }
+  else if(place - 10 === grool){
+    groolHex = "A";
+  }
+  else if(place - 11 === grool){
+    groolHex = "A";
+  }
+  else if(place - 12 === grool){
+    groolHex = "A";
+  }
+  else if(place - 13 === grool){
+    groolHex = "A";
+  }
+  else if(place - 14 === grool){
+    groolHex = "A";
+  }
+  else if(place - 15 >= grool){
+    groolHex = "A";
+  }
+  else if(place - 0 <= grool){
+    groolHex = "0";
+  }
+  else{
+    document.body.style.backgroundColor= "#000000";
+  }
+  console.log(groolHex);
+  document.body.style.backgroundColor= "#"+groolHex+groolHex+groolHex+groolHex+groolHex+groolHex;
+  if(grool >= place){
+    actionText.innerHTML += "<br> YOU WERE EATEN BY THE GROOL";
+
+  }
+}
+
 var updateStats = function(){
   if(hp >= maxhp){
     hp = maxhp;
@@ -287,7 +356,9 @@ var updateStats = function(){
   else{
     status.style.backgroundColor = "#00FF00";
   }
-
+  if(hp === 0){
+    document.body.style.backgroundColor= "#800000";
+  }
 };
 //============UPDATE============  ~~Where the magic happens. All actions get received and scanned through here. good luck exploring through it.
 var update = function(){
@@ -322,19 +393,35 @@ var update = function(){
       case "Rest":
       case "WAIT":
       case "Wait":
-        console.log("waited");
-        if(hp === maxhp && nrg === maxnrg && roomie.symbol !== "M"){
+        if(hp === maxhp && nrg === maxnrg && roomie.symbol !== "M" && amuletEnchantment !== "sleep"){
           actionText.innerHTML= "You wait for no apparent reason.";
-          regen();
           turn++;
+          GROOL(1);
+        }
+        else if(hp === maxhp && nrg === maxnrg && roomie.symbol !== "M" && amuletEnchantment === "sleep"){
+          actionText.innerHTML = "You fall into a deep sleep...";
+          turn+= 5;
+          GROOL(1);
+        }
+        else if(hp <= maxhp && nrg <= maxnrg && roomie.symbol !== "M" && amuletEnchantment === "sleep"){
+          actionText.innerHTML = "You fall into a deep and relaxing sleep...";
+          regen();
+          regen();
+          regen();
+          turn+= 3;
+          GROOL(3);
         }
         else if(roomie.symbol === 'M'){
           actionText.innerHTML = "You can't wait while there is a monster in front of you!";
+        }
+        else if(roomie.symbol === 'M' && amuletEnchantment === 'sleep'){
+          actionText.innerHTML = "Your eyes are heavy, but you can't fall asleep now!";
         }
         else{
           actionText.innerHTML= "You wait, restoring your stats.";
           regen();
           turn++;
+          GROOL(1);
         }
         break;
         
@@ -458,6 +545,7 @@ var update = function(){
             else{
               actionText.innerHTML = "The skeleton awkwardly blocks your way, and slashes you away for " + monster.dmg + " damage!";
               hp -= monster.dmg;
+              GROOL(1);
               if(hp <=0){
                 image.src = "assets/monster1win.png";
                 actionBox.disabled = true;
@@ -486,6 +574,7 @@ var update = function(){
           updateRoomText();
           turn ++;
         }
+
         place++;
         break;
        
@@ -510,11 +599,12 @@ var update = function(){
             turn ++;
             roomie = newroom();
             updateRoomText();
+            GROOL(-2);
             
           }
 
           //monster jump attack
-          else if(roomie.symbol === "M" && amuletEnchantment !== "weight"){
+          else if(roomie.symbol === "M"){
             if(roomie.name === "skeleton room"){
               actionText.innerHTML = "You do an awesome jump kick...";
               console.log("jump kick");
@@ -534,6 +624,7 @@ var update = function(){
                 turn ++;
                 place++;
                 roomie = newroom();
+                GROOL(-2);
                 updateRoomText();
               }
               else{
@@ -558,14 +649,12 @@ var update = function(){
                 nrg -=4;
                 turn++;
                 updateStats();
+                GROOL(1);
                 
               }
 
               },2000);
             }
-          }
-          else if(roomie.symbol === "M" && amuletEnchantment !== "weight"){
-            actionText.innerHTML = "Your amulet prevents you from jumping!";
           }
           //no pit
           else{
@@ -576,6 +665,7 @@ var update = function(){
             roomie = newroom();
             updateRoomText();
             updateStats();
+            GROOL(-2);
           }
         }
         //tried jump, no energy
@@ -653,6 +743,7 @@ var update = function(){
           }
         }
         turn++;
+        GROOL(1);
         break;
       
       //spit action
@@ -696,6 +787,7 @@ var update = function(){
           }  
           spit-=1;
           turn++;
+          GROOL(1);
         }
         //no spit left
         else{
@@ -762,21 +854,27 @@ var update = function(){
                     items[i].enchantment = "life saving";
                     actionText.innerHTML += "<br> You feel protected.";
                     revive = 1;
+                    amuletEnchantment = "life saving";
                   }
                   else if(rand === 2){
-                    items[i].enchantment = "weight";
-                    actionText.innerHTML += "<br> This is super heavy!";
-                    fallDamage = 5;
+                    items[i].enchantment = "reflection";
+                    actionText.innerHTML += "<br> Shiny!";
+                    amuletEnchantment = "reflection";
 
+                  }
+                  else if(rand === 3){
+                    items[i].enchantment = "sleep";
+                    actionText.innerHTML += "<br> You feel tired...!";
+                    amuletEnchantment = "sleep";
                   }
                   else{
                     items[i].enchantment = "gold";
                     actionText.innerHTML += "<br> You feel greedy.";
                     scavenger += 20;
+                    amuletEnchantment = "gold";
                   }
                   items.splice(i, 1);
                   invList.removeChild(invList.childNodes[i+1]);
-                  amuletEnchantment = items[i].enchantment;
                   return;
                 }
               }
@@ -785,7 +883,92 @@ var update = function(){
               for(i=0; i<items.length; i++){
                 if(items[i].name === 'punching glove'){
                   actionText.innerHTML = "You put on the gloves. You can really pack a punch!";
-                  dmg += 1;
+                  dmg += 2;
+                  updateStats();
+                  items.splice(i, 1);
+                  invList.removeChild(invList.childNodes[i+1]);
+                  return;
+                }
+              }
+            }
+            else if(use === 'hourglass'){
+              for(i=0; i<items.length; i++){
+                if(items[i].name === 'hourglass'){
+                  actionText.innerHTML = "The hourglass turns over. <br> The corridor extends!";
+                  lastRoom += items[i].extend;
+                  items.splice(i, 1);
+                  invList.removeChild(invList.childNodes[i+1]);
+                  return;
+                }
+              }
+            }
+            else if(use === 'potion'){
+              for(i=0; i<items.length; i++){
+                if(items[i].name === 'potion'){
+                  actionText.innerHTML = "You drink the potion... <br>";
+                  if(items[i].effect === 1){
+                    actionText.innerHTML += "Tastes great! It must have been a potion of healing!";
+                    hp = maxhp;
+                    updateStats();
+                  }
+                  else if(items[i].effect === 2){
+                    actionText.innerHTML += "Bleeech! Tastes like poison!";
+                    hp -= 5;
+                    if(hp<=0){
+                      actionBox.disabled = true;
+                      setTimeout(function(){
+                        if(revive === 1){
+                      
+                          amuletSave();
+                        }
+                        else{
+                          gameOver("You poisoned yourself!");
+                        }
+                      },2000);
+
+                    }
+                  }
+                  else if(items[i].effect === 3){
+                    actionText.innerHTML += "You feel mighty! Must have been a potion of strength!";
+                    dmg += 1;
+                    updateStats();
+                  }
+                  else if(items[i].effect === 4){
+                    actionText.innerHTML += "You feel really healthy! You're larger than life!";
+                    maxhp += 5;
+                  }
+                  else if(items[i].effect === 5){
+                    actionText.innerHTML += "You feel rich!";
+                    score += 20;
+                  }
+                  else{
+                    actionText.innerHTML += "Nothing happens!";
+                  }
+                  spit += 5;
+                  items.splice(i, 1);
+                  invList.removeChild(invList.childNodes[i+1]);
+                  return;
+                }
+              }
+            }
+            else if(use === 'medkit'){
+              for(i=0; i<items.length; i++){
+                if(items[i].name === 'medkit'){
+                  actionText.innerHTML = "You heal up. You feel super!";
+                  maxhp += items[i].health;
+                  hp = maxhp;
+                  updateStats();
+                  items.splice(i, 1);
+                  invList.removeChild(invList.childNodes[i+1]);
+                  return;
+                }
+              }
+            }
+            else if(use === 'flashlight'){
+              for(i=0; i<items.length; i++){
+                if(items[i].name === 'flashlight'){
+                  actionText.innerHTML = "You use the flashlight. <br> The darkness behind you backs up!";
+                  GROOL(items[i].power);
                   updateStats();
                   items.splice(i, 1);
                   invList.removeChild(invList.childNodes[i+1]);
@@ -815,10 +998,11 @@ var update = function(){
                 image.src = "assets/monster1.png";  
                 actionBox.disabled = false;
                 actionBox.select();
-                actionText.innerHTML = "You deal " + dmg + " damage to the skeleton!" + "<br>------<br> The skeleton does " + monster.dmg + " damage to you in return!";
+                actionText.innerHTML = "You deal " + dmg + " damage to the skeleton!" + "<br>---------------------------<br> The skeleton does " + monster.dmg + " damage to you in return!";
                 monster.hp -= dmg;
                 hp -= monster.dmg;
                 turn++;
+                GROOL(1);
                 updateStats();
                 
                 if(hp <=0){
@@ -888,7 +1072,7 @@ var update = function(){
             alert("Welcome! Today we have " + shopItem.name + " on sale for only " + shopItem.worth + " gold!"); //announce to the player what is on sale
             sell = confirm("Are you interested?");
             if(sell === true && score >= shopItem.worth && payed === 0){
-              actionText.innerHTML = "Thank you for your payment! <br> <br> -"+ shopItem.worth + " gold";
+              actionText.innerHTML = "'Thank you for your payment!'' <br> <br> -"+ shopItem.worth + " gold";
               
               score-=shopItem.worth;
               items.push(shopItem);
@@ -900,18 +1084,15 @@ var update = function(){
               payed = 1;
             }
             else if(sell === true && score < shopItem.worth){
-              actionText.innerHTML = "Thank you for-- Hey, wait a sec! You're broke! <br> Come back when you're not so poor!";
+              actionText.innerHTML = "'Thank you for-- Hey, wait a sec! You're broke! <br> Come back when you're not so poor!'";
             }
             else if(payed === 1){
-              actionText.innerHTML = "I got nothing else. Go see the guy up ahead. If there even is a guy up ahead. <br> Why are there so many shops here?";
+              actionText.innerHTML = "'I got nothing else. Go see the guy up ahead. If there even is a guy up ahead. <br> Why are there so many shops here?'";
             }
             else{
-              actionText.innerHTML = "Get outta here, then! You're scaring away my customers.";
+              actionText.innerHTML = "'Get outta here, then! You're scaring away my customers.'";
             }
           }
-          else if(payed === 1){
-              actionText.innerHTML = "I got nothing else. Scram.";
-            }
           else{
             actionText.innerHTML = "There is no shop to pay.";
           }
@@ -1057,3 +1238,4 @@ if(gameover === 0){
 actionText.innerHTML = "Welcome, adventurer! <br> Enter your action below. <br> Type 'h' or 'help' for assistance.";
 image.src = "assets/entrance.png";
 arrow.src="assets/arrowYellow.png";
+GROOL(0);
