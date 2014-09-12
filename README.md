@@ -7,7 +7,7 @@ http://neonroad.github.io/TLC/
 
 ===
 
-Enter a Long Corridor, said to have many treasures hidden within!
+Enter The Long Corridor, said to have many treasures hidden within!
 Or maybe it's just a tourist trap. Who knows?
 
 Will you find riches, or will you find death? Or perhaps... you will find both?
