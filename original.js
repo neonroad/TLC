@@ -363,6 +363,7 @@ var updateStats = function(){
   if(hp === 0){
     document.body.style.backgroundColor= "#800000";
   }
+  GROOL(0);
 };
 //============UPDATE============  ~~Where the magic happens. All actions get received and scanned through here. good luck exploring through it.
 var update = function(){
