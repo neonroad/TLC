@@ -107,7 +107,7 @@ var randItem = function(){
   }
   else if(rand === 7){
     itemGet = new item('flashlight', 10);
-    itemGet.power = randomNumber(20,1); //How far the gruel can get set back
+    itemGet.power = randomNumber(20,1); //How far the grool can get set back
   }
   return itemGet;
 };
@@ -329,9 +329,9 @@ var GROOL = function(length){
   document.body.style.backgroundColor= "#"+groolHex+groolHex+groolHex+groolHex+groolHex+groolHex;
   if(grool >= place){
     actionText.innerHTML += "<br> YOU WERE EATEN BY THE GROOL";
-    gameOver("The gruel devoured you.");
+    gameOver("The Grool devoured you.");
     if(revive === 1){
-      gameOver("The gruel devoured you and your amulet.");
+      gameOver("The Grool devoured you and your amulet.");
     }
 
   }
