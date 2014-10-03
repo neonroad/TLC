@@ -158,10 +158,10 @@ var newroom = function(){
     setTimeout(function(){
       image.src = "assets/endscreen.png";
       actionText.innerHTML = "Your final score: " + score;
-      if(score > 196){
+      if(score > 284){
         alert("Wow! You beat John's high score! Congrats!");
       }
-      else if(score === 196){
+      else if(score === 284){
         alert("You tied with John's score! Congrats!");
       }
     },2000);
@@ -197,12 +197,18 @@ var newroom = function(){
 
     //monster room
     else if(rand === 3){
-      rand = randomNumber(1,1);
+      rand = randomNumber(2,1);
       if(rand === 1){
         newerroom = new room("skeleton room", null, "M");
         newerroom.desc = "A skeleton blocks the way!";
         image.src = "assets/monster1.png";
         monster = new creature('skeleton', 5, 3);
+      }
+      else if(rand === 2){
+        newerroom = new room("eye room", null, "M");
+        newerroom.desc = "A floating eye blocks the way!";
+        image.src = "assets/monster1.png";
+        monster = new creature('eye', 7, 1)
       }
 
     }
@@ -570,6 +576,9 @@ var update = function(){
               
             }
           }
+          else if(choice === true && roomie.name === "eye room"){
+            actionText.innerHTML = "The eye has you locked into its gaze! <br> Talk about awkward eye contact.";
+          }
           else{
             actionText.innerHTML = "You stay put.";
           }
@@ -649,7 +658,7 @@ var update = function(){
                       amuletSave();
                     }
                     else{
-                      gameOver("You tried to look cool, but a skeleton embarrassed you.");
+                      gameOver("A skeleton has slain you.");
                     }
                   },2000);
                 }
@@ -661,6 +670,10 @@ var update = function(){
               }
 
               },2000);
+            }
+            else if(roomie.name === "eye room"){
+              actionText.innerHTML = "The eye has you locked into its gaze! <br> There is no escape!";
+              GROOL(1);
             }
           }
           //no pit
@@ -1061,6 +1074,73 @@ var update = function(){
               }, 1000);
               
             }
+            else if(roomie.name === "eye room"){
+              actionBox.disabled = true;
+              image.src = "assets/pow.png";
+              
+              setTimeout(function(){
+                image.src = "assets/monster1.png";  
+                actionBox.disabled = false;
+                actionBox.select();
+                if(amuletEnchantment === "reflection"){
+                  monster.dmg = 0;
+                  actionText.innerHTML += "<br> The eye is confused by your amulet!";
+                }
+                actionText.innerHTML = "You deal " + dmg + " damage to the eye!" + "<br>---------------------------<br> The eye does " + monster.dmg + " damage to you in return!";
+                monster.hp -= dmg;
+                hp -= monster.dmg;
+                turn++;
+                GROOL(1);
+                updateStats();
+                
+                if(hp <=0){
+                  actionBox.disabled = true;
+                  image.src = "assets/monster1win.png";
+                  actionText.innerHTML = "Fatal damage! <br>You black out...";
+                  setTimeout(function(){
+                    if(revive === 1){
+                      
+                      amuletSave();
+                    }
+                    else{
+                      gameOver("A floating eye has slain you."); 
+                    }
+                  }, 3000);
+                }
+                else if(monster.hp <= 0){
+                  rand = randomNumber(10, 1);
+                  image.src = "assets/monster1lose.png";
+                  actionText.innerHTML = "You won the fight! <br> +"+ (rand + scavenger) +" gold!";
+                  score += rand+scavenger;
+                  actionBox.disabled = true;
+                  setTimeout(function(){
+                    rand = randomNumber(5,1);
+                    if(rand === 1){
+                      var lootItem = randItem();
+                      actionText.innerHTML = "You found a " + lootItem.name + " in the pile of eye juice! <br> You continue.";
+                      items.push(lootItem);
+                      li = document.createElement("li");
+                      var node = document.createTextNode(lootItem.name);
+                      li.appendChild(node);
+                      invList.appendChild(li);
+
+                    }
+                    else{
+                      actionText.innerHTML = "You found nothing in the eye juice. <br> You continue.";
+                    }
+                    actionBox.disabled = false;
+                    actionBox.select();
+                    roomie = newroom();
+                    updateRoomText();
+                    updateStats();
+                    turn++;
+                    place++;
+                    updateStats();
+
+                  }, 1000);
+                }
+              }, 1000);
+            }
           }
           else if(roomie.symbol === "$"){
             actionText.innerHTML = "'Hey! You wanna tussle or what? Yeah, I thought so.'";
@@ -1248,7 +1328,10 @@ var update = function(){
 if(gameover === 0){
   update();
 }
+image.src = "assets/entrance.png";
 actionText.innerHTML = "Welcome, adventurer! <br> Enter your action below. <br> Type 'h' or 'help' for assistance.";
 image.src = "assets/entrance.png";
 arrow.src="assets/arrowYellow.png";
 GROOL(0);
+
+
