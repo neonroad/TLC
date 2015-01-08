@@ -18,12 +18,13 @@ var revive = 0;
 var amuletEnchantment = ""; //Amulet enchantment
 var scavenger = 0; //Additional gold
 var lastRoom = 20;
+var usedLever = 0;
 
 //Misc.
 var arrow = document.getElementById("arrow");
 var arrowColor = function(){
   arrow.src="assets/arrowYellow.png";
-  console.log("changed");
+  //console.log("changed");
 };
 
 //Monsters
@@ -168,7 +169,7 @@ var newroom = function(){
   }
   else{
     //random room generation
-    var rand = randomNumber(4,1);
+    var rand = randomNumber(5,1);
     //random pit generation
     if(rand === 2){
       rand = randomNumber(4,1);
@@ -221,6 +222,21 @@ var newroom = function(){
       image.src = "assets/shop.png";
       shopItem = randItem();
       
+    }
+    //trap room?
+    else if(rand === 5){
+      rand = randomNumber(1,5);
+      newerroom = new room("trap", null, "/");
+      used = 0;
+      newerroom.desc = "A mysterious lever. I wounder what happens when it is <strong>used</strong>?"
+      image.src = "http://i.filmot.org/AfB43.png";
+      lever = new item("lever", 0);
+      items.push(lever);
+      li = document.createElement("li");
+      var node = document.createTextNode(lever.name);
+      li.appendChild(node);
+      invList.appendChild(li);
+
     }
 
     else{
@@ -331,7 +347,7 @@ var GROOL = function(length){
   else{
     document.body.style.backgroundColor= "#000000";
   }
-  console.log(groolHex);
+  //console.log(groolHex);
   document.body.style.backgroundColor= "#"+groolHex+groolHex+groolHex+groolHex+groolHex+groolHex;
   if(grool >= place){
     actionText.innerHTML += "<br> YOU WERE EATEN BY THE GROOL";
@@ -453,7 +469,7 @@ var update = function(){
           if(choice === true && roomie.symbol === "S"){
             actionBox.disabled = true;
             image.src="assets/spike.png";
-            console.log("died");
+            //console.log("died");
             actionText.innerHTML = "You fell in the pit, only to be met with a spiky doom!";
               if(revive === 1){
                 amuletSave();
@@ -462,7 +478,7 @@ var update = function(){
               else{
                 setTimeout(function(){
                   gameOver("You died from falling in a spike pit.");
-                  console.log(gameover);
+                  //console.log(gameover);
                 },1000);
               }
           }
@@ -470,7 +486,7 @@ var update = function(){
           else if(choice === true && roomie.symbol === "G"){
             actionBox.disabled = true;
             image.src="assets/gold.png";
-            console.log("collected gold");
+            //console.log("collected gold");
             rand = randomNumber(11,10);
             score+=rand+scavenger;
             actionText.innerHTML = "You fell in the pit...<br> But some gold broke your fall! <br> Obtained $" + (rand+scavenger) + "!";
@@ -487,7 +503,7 @@ var update = function(){
           }
           //regular pit
           else if(choice === true && roomie.symbol === "P"){
-            console.log("deep pit hit");
+            //console.log("deep pit hit");
             fallDamage += randomNumber(5, 1); 
             actionText.innerHTML = "Ow! <br>You fell in a pit, and hurt yourself for " + fallDamage + " damage! <br> You crawl out of the pit. <br> Be more careful next time!";
             hp-=fallDamage;
@@ -512,7 +528,7 @@ var update = function(){
           else if(choice === true && roomie.symbol === "J"){
             actionBox.disabled = true;
             image.src="assets/item.png";
-            console.log("junk pile fall");
+            //console.log("junk pile fall");
             var junkItem = randItem();
             actionText.innerHTML = "Oof! You fell on something.";
             setTimeout(function(){
@@ -539,7 +555,33 @@ var update = function(){
           //refuse walking into pit
           else{
             actionText.innerHTML = "You rethink your actions.";
-            console.log("stepped back");
+            //console.log("stepped back");
+          }
+        }
+        //walk past trap room
+        else if(roomie.symbol === "/"){
+          if(usedLever === 0){
+            for(i=0; i<items.length; i++){
+              if(items[i].name === 'lever'){
+                items.splice(i, 1);
+                invList.removeChild(invList.childNodes[i+1]);
+                roomie = newroom();
+                place++
+                updateRoomText();
+                actionText.innerHTML = "You walk away from the temptation.";
+                turn ++;
+                return;
+              }
+            }            
+          }
+          else{
+            actionText.innerHTML = "You move onward.";
+            roomie = newroom();
+            place++
+            updateRoomText();
+            turn ++;
+            return; 
+
           }
         }
 
@@ -550,7 +592,7 @@ var update = function(){
             rand = randomNumber(4,1);
             if(rand === 2){
               actionText.innerHTML = "You escaped the skeleton! <br> Guess he didn't have the guts to stop you.";
-              console.log("escaped");
+              //console.log("escaped");
               roomie = newroom();
               updateRoomText();
               place++
@@ -586,7 +628,7 @@ var update = function(){
         //walking - no obstacle
         else{
           actionText.innerHTML = "You move onward.";
-          console.log("walked");
+          //console.log("walked");
           roomie = newroom();
           place++
           updateRoomText();
@@ -609,7 +651,7 @@ var update = function(){
         //check for pit if energy available
         if(nrg >=2){
           if(roomie.symbol === "P" || roomie.symbol === "S" || roomie.symbol === "G" || roomie.symbol === "J"){
-            console.log("jumped over pit");
+            //console.log("jumped over pit");
             actionText.innerHTML = "You jump over the pit!";
             nrg-=2;
             turn ++;
@@ -623,7 +665,7 @@ var update = function(){
           else if(roomie.symbol === "M"){
             if(roomie.name === "skeleton room"){
               actionText.innerHTML = "You do an awesome jump kick...";
-              console.log("jump kick");
+              //console.log("jump kick");
               image.src = "assets/jumpkick.png";
               actionBox.disabled = true;
 
@@ -634,7 +676,7 @@ var update = function(){
                 actionBox.disabled = false;
                 actionBox.select();
                 actionText.innerHTML = "... and the skeleton shatters as you fly through!";
-                console.log("succes skeleton jump kick");
+                //console.log("succes skeleton jump kick");
                 nrg-=4;
                 updateStats();
                 turn ++;
@@ -679,7 +721,7 @@ var update = function(){
           //no pit
           else{
             actionText.innerHTML = "You jump!";
-            console.log("jumped");
+            //console.log("jumped");
             nrg-=2;
             turn ++;
             roomie = newroom();
@@ -690,7 +732,7 @@ var update = function(){
         }
         //tried jump, no energy
         else{
-          console.log("tried jump");
+          //console.log("tried jump");
           actionText.innerHTML = "You tried to jump, <br> but you don't have any energy.";
         }
         place++;
@@ -754,11 +796,11 @@ var update = function(){
         else{
           //miss search in monster room
           if(roomie.symbol === "M"){
-            console.log("miss monster search");
+            //console.log("miss monster search");
             actionText.innerHTML = "You don't notice anything about the monster.";
           }
           else{
-            console.log("miss search");
+            //console.log("miss search");
             actionText.innerHTML = "You don't notice anything.";
           }
         }
@@ -795,6 +837,10 @@ var update = function(){
           else if(roomie.symbol === "M"){
             if(roomie.name === "skeleton room"){
               actionText.innerHTML = "*splat* <br> The skeleton looks sad.";
+            }
+            else if(roomie.name == "eye room"){
+              actionText.innerHTML = "*spit* <br> You spit in the eye! It's real mad now!"
+              monster.dmg += 2;
             }
           }
           //shop spit
@@ -841,7 +887,6 @@ var update = function(){
                 if(items[i].name === 'water'){
                   actionText.innerHTML = "You drink the water. <br> <br> <br> Tasty!";
                   spit+=3;
-                  hp+=2;
                   items[i].fill -=1;
                   //water runs out
                   if(items[i].fill <=0){
@@ -988,10 +1033,32 @@ var update = function(){
               for(i=0; i<items.length; i++){
                 if(items[i].name === 'flashlight'){
                   actionText.innerHTML = "You use the flashlight. <br> The darkness behind you backs up!";
+                  if(roomie.name == "eye room"){
+                    actionText.innerHTML += "<br>You blinded the eye!";
+                    turn ++;
+                    place++
+                    roomie = newroom();
+                    updateRoomText();
+                    actionBox.disabled = false;
+                    actionBox.select();
+
+                  }
                   GROOL(items[i].power * -1);
                   updateStats();
                   items.splice(i, 1);
                   invList.removeChild(invList.childNodes[i+1]);
+                  return;
+                }
+              }
+            }
+            //use lever
+            else if(use === 'lever'){
+              for(i=0; i<items.length; i++){
+                if(items[i].name === 'lever'){
+                  actionText.innerHTML = "You use the lever. <br> you puke!";
+                  items.splice(i, 1);
+                  invList.removeChild(invList.childNodes[i+1]);
+                  usedLever = 1;
                   return;
                 }
               }
@@ -1303,7 +1370,7 @@ var update = function(){
         break;
       //unkown action overall
       default:
-        console.log("misunderstood");
+        //console.log("misunderstood");
         actionText.innerHTML = "Sorry, didn't quite get that. <br> Press 'h' for help.";
         gameover=0;
         arrow.src="assets/arrowRed.png";
