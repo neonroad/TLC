@@ -514,7 +514,7 @@ var update = function(){
                 setTimeout(function(){
                   gameOver("You died from falling in a spike pit.");
                   //console.log(gameover);
-                },1000);
+                },2000);
               }
           }
           //gold pit
@@ -705,7 +705,7 @@ var update = function(){
         }
         break;
        
-      //jump 
+      //jump action
       case "J":
       case "j":
       case "skip":
@@ -732,6 +732,23 @@ var update = function(){
               boulderStart = 0;
             }
             
+          }
+          else if(roomie.symbol === "/"){
+            for(i=0; i<items.length; i++){
+              if(items[i].name === 'lever'){
+                items.splice(i, 1);
+                invList.removeChild(invList.childNodes[i+1]);
+                actionText.innerHTML = "You jump away from the temptation.";
+                nrg-=2;
+                turn ++;
+                roomie = newroom();
+                updateRoomText();
+                updateStats();
+                GROOL(-2);
+                usedLever = 0;
+                return;
+              }
+            } 
           }
 
           //monster jump attack
@@ -1357,7 +1374,7 @@ var update = function(){
               sellGem = confirm("I found this thing lyin' around, and you can have it for only " + shopItem.color *10 + " gold...");
               
               if(sellGem === true && score >= shopItem.color *10){
-                actionText.innerHTML = "Sold. <br><br><br> Sucker... heh heh.";
+                actionText.innerHTML = "Sold. <br><br><br> Heh heh.";
                 score -= shopItem.color *10;
                 actionText.innerHTML += "<br>-" + shopItem.color *10 +" gold";
                 payed = 1;
