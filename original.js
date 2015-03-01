@@ -223,7 +223,7 @@ var newroom = function(){
       else if(rand === 2 && boulderStart === 0){
         newerroom = new room("eye room", null, "M");
         newerroom.desc = "A floating eye blocks the way!";
-        image.src = "assets/monster1.png";
+        image.src = "assets/monster2.png";
         monster = new creature('eye', 7, 1)
       }
 
@@ -1269,7 +1269,7 @@ var update = function(){
               image.src = "assets/pow.png";
               
               setTimeout(function(){
-                image.src = "assets/monster1.png";  
+                image.src = "assets/monster2.png";  
                 actionBox.disabled = false;
                 actionBox.select();
                 if(amuletEnchantment === "reflection"){
@@ -1290,7 +1290,7 @@ var update = function(){
                 
                 if(hp <=0){
                   actionBox.disabled = true;
-                  image.src = "assets/monster1win.png";
+                  image.src = "assets/monster2win.png";
                   actionText.innerHTML = "Fatal damage! <br>You black out...";
                   setTimeout(function(){
                     if(revive === 1){
@@ -1304,7 +1304,7 @@ var update = function(){
                 }
                 else if(monster.hp <= 0){
                   rand = randomNumber(10, 1);
-                  image.src = "assets/monster1lose.png";
+                  image.src = "assets/monster2lose.png";
                   actionText.innerHTML = "You won the fight! <br> +"+ (rand + scavenger) +" gold!";
                   score += rand+scavenger;
                   actionBox.disabled = true;
